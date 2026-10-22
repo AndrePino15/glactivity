@@ -22,11 +22,6 @@
   font: var(--text-callout);
 }
 
-.lead strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
 .form {
   display: flex;
   flex-direction: column;
@@ -53,12 +48,6 @@
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-.code {
-  font: 600 24px/30px var(--font);
-  letter-spacing: 0.3em;
-  text-align: center;
-}
-
 .button {
   display: block;
   width: 100%;
@@ -79,30 +68,7 @@
   opacity: 0.6;
 }
 
-.link {
-  color: var(--accent);
-  font: var(--text-subhead);
-}
-
 .error {
   color: var(--cat-exam);
   font: var(--text-footnote);
-}
-
-.link:disabled {
-  opacity: 0.4;
-}
-
-.links {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-5);
-}
-
-.notice {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius);
-  background: var(--accent-soft);
-  color: var(--text);
-  font: var(--text-subhead);
 }

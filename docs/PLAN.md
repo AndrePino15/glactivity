@@ -15,7 +15,7 @@ Glactivity takes some of the planning load off your days: a calendar of everythi
 |---|---|---|
 | Web app (the phone app for now) | Next.js + TypeScript, installable as a home-screen app | Hosted on Vercel (free). Mobile-first. |
 | iPhone / iPad (later) | SwiftUI | Built once a Mac is available. Uses the same backend, so nothing is rebuilt. Free Apple ID only: no paid developer account, Siri or widgets needed. |
-| Backend | Supabase (free tier): Postgres, email-code sign-in, scheduled jobs | Row level security on every personal table. |
+| Backend | Supabase (free tier): Postgres, email + password sign-in, scheduled jobs | Row level security on every personal table. |
 | Calendars | ICS feeds synced on the server | University of Southampton timetable feed, Outlook (uni account) if publishing is allowed, an exam timetable paste-in. |
 | Holidays | gov.uk bank holidays (England) + a public holiday API (Portugal) | Plus a "where am I" switch 🇬🇧/🇵🇹. |
 | Content | iTunes Search API, Open Library, TMDB | Album art + Apple Music links, book covers, film posters. |
@@ -44,7 +44,7 @@ The timetable feed URL is personal and treated as a secret: it's stored in the d
 
 Big features are developed on a branch and merged to `main` at each milestone.
 
-- [x] **Phase 0 – Foundations:** monorepo, design system, light/night themes, installable app, five tab shells + Settings, email-code sign-in, database schema with RLS and tests.
+- [x] **Phase 0 – Foundations:** monorepo, design system, light/night themes, installable app, five tab shells + Settings, email + password sign-in, database schema with RLS and tests.
 - [ ] **Phase 1 – First version you use daily**
   - Today page with real data
   - Timetable: Southampton ICS feed (refreshed every few hours), exam timetable paste-in

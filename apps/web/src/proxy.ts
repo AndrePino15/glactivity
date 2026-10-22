@@ -29,25 +29,9 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const { pathname, searchParams } = request.nextUrl;
-
-  // Tapping the link in a sign-in email lands on the site with ?code=…
-  // Finish signing in here, then tidy the code out of the address.
-  const code = searchParams.get("code");
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    const target = request.nextUrl.clone();
-    target.searchParams.delete("code");
-    if (error) {
-      // Usually opened in a different browser from the one that asked for it.
-      target.pathname = "/login";
-      target.search = "?link=invalid";
-    }
-    return redirectKeepingCookies(target, response);
-  }
-
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims);
+  const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   if (!signedIn && !isPublic) {

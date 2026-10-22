@@ -14,7 +14,7 @@ Without Supabase settings the app runs in **preview mode**: every screen works b
 ## Layout
 
 - `src/app/(app)/`: the five tabs (Today, Timetable, Lifestyle, Fun, Lists) and Settings, sharing the tab bar / sidebar shell
-- `src/app/login/`: sign-in with an emailed one-time code
+- `src/app/login/`: email + password sign-in (the account is created in Supabase; sign-ups are closed)
 - `src/components/`: navigation, the squirrel, shared UI pieces
 - `src/lib/`: theme, greeting, navigation and Supabase helpers
 - `src/proxy.ts`: refreshes the session and sends signed-out visitors to `/login` (Next 16's replacement for middleware)
