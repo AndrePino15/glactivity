@@ -25,8 +25,14 @@ Defined once in `apps/web/src/app/globals.css` with `light-dark()`, so every col
 | `--surface` (cards) | `#FCFBF8` | `#151B36` |
 | `--text` | `#1D1B18` | `#EEF0F8` |
 | `--text-secondary` | `#6B665E` | `#9AA1BD` |
-| `--accent` | `#B8622A` chestnut | `#E8A15F` amber |
+| `--accent` (buttons, selected states) | `#1D1B18` ink | `#F2EAD9` cream |
 
-Event categories have their own colours (`--cat-lecture`, `--cat-exam`, `--cat-gym`, `--cat-meal`, `--cat-social`, `--cat-personal`).
+There is no brand colour: the squirrel is the only colour on the page. Event categories have their own quiet colours, used only as the thin edge next to an event's time (`--cat-lecture`, `--cat-exam`, `--cat-gym`, `--cat-meal`, `--cat-social`, `--cat-personal`).
 
 Type follows Apple's text styles (`--text-large-title` 34pt down to `--text-caption` 12pt) using the system font, which is SF Pro on iPhone and Mac.
+
+## Layout rules
+
+- No boxes or icon tiles for their own sake. Content sits on the page as rows with hairline dividers (`List` / `Row` in `apps/web/src/components/ui.tsx`).
+- Space separates sections; a section only renders when it has something to show.
+- One primary button per screen (ink/cream). Everything else is a plain text action.

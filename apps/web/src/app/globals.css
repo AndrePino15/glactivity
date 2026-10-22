@@ -12,6 +12,7 @@
   --bg: light-dark(#f5f3ee, #0b1026);
   --surface: light-dark(#fcfbf8, #151b36);
   --surface-raised: light-dark(#ffffff, #1c2342);
+  --scrim: light-dark(rgb(29 27 24 / 0.25), rgb(3 5 14 / 0.6));
   --fill: light-dark(rgb(29 27 24 / 0.05), rgb(238 240 248 / 0.07));
   --fill-strong: light-dark(rgb(29 27 24 / 0.09), rgb(238 240 248 / 0.12));
   --separator: light-dark(rgb(29 27 24 / 0.08), rgb(238 240 248 / 0.08));
@@ -22,22 +23,24 @@
   --text-secondary: light-dark(#6b665e, #9aa1bd);
   --text-tertiary: light-dark(#a19b91, #636b8c);
 
-  /* Accent: the squirrel's chestnut by day, warm amber under the stars */
-  --accent: light-dark(#b8622a, #e8a15f);
-  --accent-soft: light-dark(rgb(184 98 42 / 0.12), rgb(232 161 95 / 0.16));
-  --on-accent: light-dark(#fffaf3, #1a1206);
+  /*
+   * Accent: no brand colour. Ink by day, cream under the stars, so the
+   * squirrel is the only colour on the page. Category colours are quiet
+   * and only used where they carry meaning (which calendar an event is from).
+   */
+  --accent: light-dark(#1d1b18, #f2ead9);
+  --on-accent: light-dark(#f5f3ee, #0b1026);
 
-  /* Event categories (timetable colour-coding) */
-  --cat-lecture: light-dark(#4a6fd1, #8aa6ff);
-  --cat-exam: light-dark(#d1495b, #ff8a96);
-  --cat-gym: light-dark(#3b9a6a, #6fd6a0);
-  --cat-meal: light-dark(#d08a1e, #f2bd5c);
-  --cat-social: light-dark(#c4559a, #f08cc8);
-  --cat-personal: light-dark(#7c5cc4, #b39cff);
+  --cat-lecture: light-dark(#5b7bb5, #93abd9);
+  --cat-exam: light-dark(#b5564f, #e09a93);
+  --cat-gym: light-dark(#5a8c6c, #93c4a3);
+  --cat-meal: light-dark(#b08646, #d9b77c);
+  --cat-social: light-dark(#a8648c, #d49cbd);
+  --cat-personal: light-dark(#7f6aa8, #b4a5d6);
+  --cat-other: light-dark(#8d877d, #8a91ab);
+  --cat-holiday: light-dark(#a3896b, #c9b08f);
 
   --star: light-dark(transparent, rgb(255 246 224 / 0.55));
-  --shadow-color: light-dark(rgb(60 45 25 / 0.05), transparent);
-  --shadow-card: 0 1px 2px var(--shadow-color), 0 4px 16px var(--shadow-color);
 
   /* Type: SF Pro on Apple devices, the native UI font elsewhere */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
@@ -56,8 +59,7 @@
 
   /* Shape & space */
   --radius-sm: 10px;
-  --radius: 16px;
-  --radius-lg: 22px;
+  --radius: 14px;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -158,7 +160,7 @@ button {
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: var(--fill-strong);
 }
 
 @media (prefers-reduced-motion: reduce) {

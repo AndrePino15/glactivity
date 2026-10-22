@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/ui";
+import { FunContent } from "./FunContent";
 
 export const metadata: Metadata = { title: "Fun" };
 
@@ -7,7 +8,7 @@ export default function FunPage() {
   return (
     <>
       <PageHeader title="Fun" />
-      <EmptyState pose="celebrating" title="Room to play">Album of the week, daily games and what you’re reading or watching.</EmptyState>
+      <FunContent />
     </>
   );
 }

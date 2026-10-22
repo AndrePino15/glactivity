@@ -30,7 +30,7 @@
 }
 
 .tab[data-active] {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .sidebar {
@@ -93,6 +93,7 @@
 }
 
 .row[data-active] {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--fill);
+  color: var(--text);
+  font-weight: 600;
 }

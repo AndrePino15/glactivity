@@ -1,0 +1,10 @@
+.time {
+  display: inline-block;
+  min-width: 58px;
+  padding-left: 9px;
+  border-left: 3px solid var(--cat);
+  border-radius: 1px;
+  color: var(--text);
+  font: 500 15px/20px var(--font);
+  font-variant-numeric: tabular-nums;
+}

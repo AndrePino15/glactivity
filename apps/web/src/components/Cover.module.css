@@ -1,0 +1,14 @@
+.cover {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 0 0 0.5px var(--separator);
+}
+
+.blank {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--fill);
+}

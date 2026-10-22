@@ -22,6 +22,22 @@ describe("new users", () => {
   });
 });
 
+describe("phase 1 migration", () => {
+  it("backfills accounts created before the schema existed", async () => {
+    const fresh = await createTestDb({ before: async (db) => {
+      await db.query("insert into auth.users (id) values ($1)", [ALICE]);
+    } });
+    expect(await fresh.query("select 1 from public.profiles").then((r) => r.rows.length)).toBe(1);
+    expect(
+      await fresh.query("select 1 from public.games where user_id = $1", [ALICE]).then((r) => r.rows.length),
+    ).toBe(8);
+  });
+
+  it("no longer has a holidays table", async () => {
+    expect(await count("select 1 from information_schema.tables where table_name = 'holidays'")).toBe(0);
+  });
+});
+
 describe("row level security", () => {
   it("fills user_id automatically and keeps rows private", async () => {
     await asUser(db, ALICE, () =>
@@ -46,16 +62,6 @@ describe("row level security", () => {
       db.query("update public.profiles set display_name = 'x' where id = $1", [ALICE]),
     );
     expect(result.affectedRows).toBe(0);
-  });
-
-  it("lets users read public holidays but not edit them", async () => {
-    await db.query("insert into public.holidays values ('PT', '2026-12-08', 'Imaculada Conceição')");
-    expect(await asUser(db, ALICE, () => count("select 1 from public.holidays"))).toBe(1);
-    await expect(
-      asUser(db, ALICE, () =>
-        db.query("insert into public.holidays values ('GB', '2026-12-25', 'Christmas Day')"),
-      ),
-    ).rejects.toThrow(/row-level security/);
   });
 });
 

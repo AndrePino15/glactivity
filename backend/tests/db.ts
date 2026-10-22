@@ -9,7 +9,7 @@ const MIGRATIONS = join(import.meta.dirname, "../supabase/migrations");
  * (auth.users, auth.uid(), the authenticated role) to run our migrations and
  * exercise row level security.
  */
-export async function createTestDb() {
+export async function createTestDb(options: { before?: (db: PGlite) => Promise<void> } = {}) {
   const db = new PGlite();
   await db.exec(`
     create schema auth;
@@ -20,6 +20,7 @@ export async function createTestDb() {
     create role authenticated;
     grant usage on schema auth to authenticated;
   `);
+  await options.before?.(db);
   for (const file of readdirSync(MIGRATIONS).sort()) {
     await db.exec(readFileSync(join(MIGRATIONS, file), "utf8"));
   }

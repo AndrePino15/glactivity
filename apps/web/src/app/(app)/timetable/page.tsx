@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { Timetable } from "./Timetable";
 
 export const metadata: Metadata = { title: "Timetable" };
 
 export default function TimetablePage() {
-  return (
-    <>
-      <PageHeader title="Timetable" />
-      <EmptyState pose="running" title="Gathering your calendars">Your Southampton timetable, exams and personal events will live here in day and week views.</EmptyState>
-    </>
-  );
+  return <Timetable />;
 }

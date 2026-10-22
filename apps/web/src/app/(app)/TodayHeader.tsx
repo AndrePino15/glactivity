@@ -14,8 +14,8 @@ export function TodayHeader() {
       eyebrow={now ? formatDayHeading(now) : " "}
       title={now ? greetingFor(now) : "Today"}
       action={
-        <Link href="/settings" className={styles.iconButton} aria-label="Settings">
-          <Settings size={20} strokeWidth={1.9} />
+        <Link href="/settings" className={styles.settingsLink} aria-label="Settings">
+          <Settings size={22} strokeWidth={1.6} />
         </Link>
       }
     />

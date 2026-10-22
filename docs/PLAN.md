@@ -37,7 +37,8 @@ The timetable feed URL is personal and treated as a secret: it's stored in the d
 
 - Day: warm off-white `#F5F3EE`. Night: starry deep navy `#0B1026`. Never pure white or black.
 - Follows the phone's light/dark setting by default, with a Day/Night override in Settings.
-- SF Pro, rounded cards, one accent colour (chestnut by day, amber by night), lucide line icons.
+- SF Pro, no brand accent colour: ink by day, cream at night, so the painted squirrel is the only colour on the page.
+- **Clean and intentional (Phase 1 feedback):** no boxes or icon tiles for their own sake. Content sits on the page as lists with hairline dividers, spacing separates sections, and a section only appears when it has something to show. Colour is only used where it means something (which calendar an event came from).
 - Mascot: a squirrel. It stashes things away for later, which is what the app does for you. See `design/`.
 
 ## Roadmap
@@ -45,13 +46,15 @@ The timetable feed URL is personal and treated as a secret: it's stored in the d
 Big features are developed on a branch and merged to `main` at each milestone.
 
 - [x] **Phase 0 – Foundations:** monorepo, design system, light/night themes, installable app, five tab shells + Settings, email + password sign-in, database schema with RLS and tests.
-- [ ] **Phase 1 – First version you use daily**
-  - Today page with real data
-  - Timetable: Southampton ICS feed (refreshed every few hours), exam timetable paste-in
-  - Lists: shopping, reminders with notifications, movies/books/albums
-  - Fun: album of the week (picked every Monday, Apple Music link, reroll), daily games with "played today"
+- [x] **Phase 1 – First version you use daily**
+  - Design rework: ink/cream instead of orange, no icon tiles, lists instead of boxes
+  - Today: schedule, a one-tap "going home?" question when a break is coming, reminders due soon, shopping-day nudge, album of the week, unplayed games, current book
+  - Timetable: week strip + day agenda; calendar links (Southampton ICS) synced on the server and refreshed every few hours when you open the app; exam timetable paste-in
+  - Lists: shopping (instant add, ticked items clear the next day), reminders (weekly/monthly/yearly, shown on Today ahead of time), watch/read/listen with cover search
+  - Fun: album of the week (picked every Monday from your Listen list, Apple Music link, pick another), daily games that mark themselves played when opened
   - England + Portugal holidays, where-am-I switch, automatic break detection
-- [ ] **Phase 2 – Lifestyle:** workout plans and options, meal plan → shopping list, term/break/exam modes driving suggestions.
+  - Not yet: phone notifications for reminders. They need push keys and a scheduled job, so they move to Phase 2. Until then, reminders appear on Today.
+- [ ] **Phase 2 – Lifestyle:** workout plans and options, meal plan → shopping list, term/break/exam modes driving suggestions, push notifications for reminders.
 - [ ] **Phase 3 – Smarter:** rules-based suggestion engine, then an optional Claude daily brief and free-text capture ("gym cancelled, out of eggs").
 - [ ] **Phase 4 – SwiftUI app** for iPhone/iPad, plus Apple Health auto-logging of workouts.
 - [ ] **Phase 5 – ESP32 alarm** so the phone can stay out of the bedroom.

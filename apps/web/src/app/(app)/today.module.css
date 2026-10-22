@@ -1,20 +1,9 @@
-.iconButton {
+.settingsLink {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--fill);
+  width: 32px;
+  height: 32px;
   color: var(--text-secondary);
-  transition: background 0.15s var(--ease), transform 0.15s var(--ease);
-}
-
-.iconButton:hover {
-  background: var(--fill-strong);
-}
-
-.iconButton:active {
-  transform: scale(0.94);
 }
 
 .footer {
@@ -25,4 +14,31 @@
   margin-top: var(--space-7);
   color: var(--text-tertiary);
   font: var(--text-footnote);
+}
+
+.prompt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+  font: var(--text-callout);
+}
+
+.promptActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.context {
+  margin-bottom: var(--space-3);
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+}
+
+/* The sidebar has Settings on larger screens. */
+@media (min-width: 900px) {
+  .settingsLink {
+    display: none;
+  }
 }

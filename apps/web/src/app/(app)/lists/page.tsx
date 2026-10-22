@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { ShoppingList } from "./ShoppingList";
 
-export const metadata: Metadata = { title: "Lists" };
+export const metadata: Metadata = { title: "Shopping" };
 
-export default function ListsPage() {
-  return (
-    <>
-      <PageHeader title="Lists" />
-      <EmptyState pose="stashing" title="Nothing stashed yet">Your weekly shopping list, reminders like rent day, and things to watch, read and listen to.</EmptyState>
-    </>
-  );
+export default function ShoppingPage() {
+  return <ShoppingList />;
 }

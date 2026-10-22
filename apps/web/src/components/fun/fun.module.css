@@ -1,0 +1,69 @@
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.featureCover {
+  display: block;
+  width: min(280px, 100%);
+}
+
+.bigCover {
+  display: block;
+  width: min(280px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--fill);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+}
+
+.albumTitle {
+  font: 600 20px/25px var(--font);
+}
+
+.albumArtist {
+  color: var(--text-secondary);
+  font: var(--text-body);
+}
+
+.featureActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-top: var(--space-1);
+}
+
+.inlineLink {
+  font: 600 15px/20px var(--font);
+  text-decoration: underline;
+  text-decoration-color: var(--separator);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+.history {
+  margin-top: var(--space-6);
+}
+
+.historyTitle {
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font: var(--text-footnote);
+}
+
+.compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  padding-top: var(--space-1);
+}
+
+.compact a {
+  font: var(--text-body);
+  text-decoration: underline;
+  text-decoration-color: var(--separator);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
