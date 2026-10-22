@@ -7,7 +7,7 @@ export default function LifestylePage() {
   return (
     <>
       <PageHeader title="Lifestyle" />
-      <EmptyState title="Workouts and meals, coming soon">Your workout plan, gym options and weekly meal plan will be gathered here.</EmptyState>
+      <EmptyState pose="snacking" title="Workouts and meals, coming soon">Your workout plan, gym options and weekly meal plan will be gathered here.</EmptyState>
     </>
   );
 }

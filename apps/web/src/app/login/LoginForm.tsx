@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Squirrel } from "@/components/Squirrel";
+import { Mascot } from "@/components/Mascot";
 import { getSupabase } from "@/lib/supabase/client";
 import styles from "./login.module.css";
 
@@ -26,7 +26,7 @@ export function LoginForm() {
   if (!supabase) {
     return (
       <main className={styles.page}>
-        <Squirrel size={96} />
+        <Mascot pose="standing" height={132} preload />
         <h1>Preview mode</h1>
         <p className={styles.lead}>
           Glactivity isn’t connected to its database yet, so there’s nothing to sign in to.
@@ -73,7 +73,7 @@ export function LoginForm() {
 
   return (
     <main className={styles.page}>
-      <Squirrel size={96} />
+      <Mascot pose="standing" height={132} preload />
       <h1>Glactivity</h1>
 
       {step.kind === "email" ? (

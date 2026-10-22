@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
 import { NAV_ITEMS, isActive } from "@/lib/nav";
-import { Squirrel } from "./Squirrel";
+import { Mascot } from "./Mascot";
 import styles from "./Navigation.module.css";
 
 /** Bottom tab bar on phones. */
@@ -38,7 +38,7 @@ export function Sidebar() {
   return (
     <nav className={styles.sidebar} aria-label="Main">
       <Link href="/" className={styles.brand}>
-        <Squirrel size={34} />
+        <Mascot pose="standing" height={36} preload />
         <span>Glactivity</span>
       </Link>
       <ul>

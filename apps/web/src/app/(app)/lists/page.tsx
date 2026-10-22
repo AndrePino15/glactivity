@@ -7,7 +7,7 @@ export default function ListsPage() {
   return (
     <>
       <PageHeader title="Lists" />
-      <EmptyState title="Nothing stashed yet">Your weekly shopping list, reminders like rent day, and things to watch, read and listen to.</EmptyState>
+      <EmptyState pose="stashing" title="Nothing stashed yet">Your weekly shopping list, reminders like rent day, and things to watch, read and listen to.</EmptyState>
     </>
   );
 }

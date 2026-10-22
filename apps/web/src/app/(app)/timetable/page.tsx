@@ -7,7 +7,7 @@ export default function TimetablePage() {
   return (
     <>
       <PageHeader title="Timetable" />
-      <EmptyState title="Stashing your calendars">Your Southampton timetable, exams and personal events will live here in day and week views.</EmptyState>
+      <EmptyState pose="running" title="Gathering your calendars">Your Southampton timetable, exams and personal events will live here in day and week views.</EmptyState>
     </>
   );
 }

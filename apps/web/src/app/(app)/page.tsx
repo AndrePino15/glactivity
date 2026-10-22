@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { BookOpen, CalendarDays, Disc3, Gamepad2, Sparkles } from "lucide-react";
+import { Mascot } from "@/components/Mascot";
 import { Card, Placeholder, Section } from "@/components/ui";
 import { TodayHeader } from "./TodayHeader";
+import styles from "./today.module.css";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -59,6 +61,11 @@ export default function TodayPage() {
           />
         </Card>
       </Section>
+
+      <footer className={styles.footer}>
+        <Mascot pose="lounging" height={96} />
+        <p>That’s everything for today.</p>
+      </footer>
     </>
   );
 }

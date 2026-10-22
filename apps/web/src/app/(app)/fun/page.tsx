@@ -7,7 +7,7 @@ export default function FunPage() {
   return (
     <>
       <PageHeader title="Fun" />
-      <EmptyState title="Room to play">Album of the week, daily games and what you’re reading or watching.</EmptyState>
+      <EmptyState pose="celebrating" title="Room to play">Album of the week, daily games and what you’re reading or watching.</EmptyState>
     </>
   );
 }

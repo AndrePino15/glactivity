@@ -2,9 +2,18 @@
 
 ## Mascot
 
-`mascot/squirrel.svg` is the source artwork. The web app renders an inline copy (`apps/web/src/components/Squirrel.tsx`). Keep the two in sync when the squirrel changes.
+A painted red squirrel, from `mascot/squirrel-sheet.webp`. `mascot/cut_poses.py` cuts the six poses out of the sheet onto transparent backgrounds (`mascot/poses/*.png`). The app serves WebP copies from `apps/web/public/mascot/` through the `Mascot` component.
 
-`mascot/app-icon.svg` and `mascot/app-icon-maskable.svg` (more padding, for Android's masks) are the home-screen icons. The PNGs in `apps/web/public/icons/` and `apps/web/src/app/apple-icon.png` are rendered from them.
+| Pose | Where it appears |
+|---|---|
+| `standing` | App icon, sign-in, sidebar logo |
+| `running` | Timetable |
+| `stashing` (arms full of acorns) | Lists |
+| `snacking` (eating an acorn) | Lifestyle |
+| `celebrating` (falling leaves) | Fun |
+| `lounging` (on a branch) | Bottom of Today |
+
+`mascot/app-icon.png` (1024px, standing squirrel on cream) is the source for the PNG icons in `apps/web/public/icons/` and `apps/web/src/app/{icon,apple-icon}.png`.
 
 ## Tokens
 

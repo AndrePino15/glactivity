@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Squirrel } from "./Squirrel";
+import { Mascot, type MascotPose } from "./Mascot";
 import styles from "./ui.module.css";
 
 /** iOS-style large title with an optional small line above and an action on the right. */
@@ -69,10 +69,18 @@ export function Placeholder({
 }
 
 /** Full-page empty state with the squirrel. */
-export function EmptyState({ title, children }: { title: string; children: ReactNode }) {
+export function EmptyState({
+  pose,
+  title,
+  children,
+}: {
+  pose: MascotPose;
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <div className={styles.empty}>
-      <Squirrel size={112} />
+      <Mascot pose={pose} height={140} preload className={styles.emptyMascot} />
       <h2>{title}</h2>
       <p>{children}</p>
     </div>
