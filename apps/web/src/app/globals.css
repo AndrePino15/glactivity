@@ -1,0 +1,171 @@
+/*
+ * Glactivity design tokens.
+ * Day: warm off-white paper. Night: deep starry navy. Never pure white or black.
+ * Each colour is declared once with light-dark(); `color-scheme` decides which
+ * side wins. It follows the device by default, or the [data-theme] override
+ * set from Settings.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --bg: light-dark(#f5f3ee, #0b1026);
+  --surface: light-dark(#fcfbf8, #151b36);
+  --surface-raised: light-dark(#ffffff, #1c2342);
+  --fill: light-dark(rgb(29 27 24 / 0.05), rgb(238 240 248 / 0.07));
+  --fill-strong: light-dark(rgb(29 27 24 / 0.09), rgb(238 240 248 / 0.12));
+  --separator: light-dark(rgb(29 27 24 / 0.08), rgb(238 240 248 / 0.08));
+  --bar: light-dark(rgb(245 243 238 / 0.78), rgb(11 16 38 / 0.72));
+
+  /* Text */
+  --text: light-dark(#1d1b18, #eef0f8);
+  --text-secondary: light-dark(#6b665e, #9aa1bd);
+  --text-tertiary: light-dark(#a19b91, #636b8c);
+
+  /* Accent: the squirrel's chestnut by day, warm amber under the stars */
+  --accent: light-dark(#b8622a, #e8a15f);
+  --accent-soft: light-dark(rgb(184 98 42 / 0.12), rgb(232 161 95 / 0.16));
+  --on-accent: light-dark(#fffaf3, #1a1206);
+
+  /* Event categories (timetable colour-coding) */
+  --cat-lecture: light-dark(#4a6fd1, #8aa6ff);
+  --cat-exam: light-dark(#d1495b, #ff8a96);
+  --cat-gym: light-dark(#3b9a6a, #6fd6a0);
+  --cat-meal: light-dark(#d08a1e, #f2bd5c);
+  --cat-social: light-dark(#c4559a, #f08cc8);
+  --cat-personal: light-dark(#7c5cc4, #b39cff);
+
+  --star: light-dark(transparent, rgb(255 246 224 / 0.55));
+  --shadow-color: light-dark(rgb(60 45 25 / 0.05), transparent);
+  --shadow-card: 0 1px 2px var(--shadow-color), 0 4px 16px var(--shadow-color);
+
+  /* Type: SF Pro on Apple devices, the native UI font elsewhere */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-rounded: ui-rounded, "SF Pro Rounded", var(--font);
+
+  --text-large-title: 700 34px/41px var(--font);
+  --text-title: 700 28px/34px var(--font);
+  --text-title2: 700 22px/28px var(--font);
+  --text-headline: 600 17px/22px var(--font);
+  --text-body: 400 17px/22px var(--font);
+  --text-callout: 400 16px/21px var(--font);
+  --text-subhead: 400 15px/20px var(--font);
+  --text-footnote: 400 13px/18px var(--font);
+  --text-caption: 500 12px/16px var(--font);
+
+  /* Shape & space */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 28px;
+  --space-7: 40px;
+  --gutter: 16px;
+
+  --tabbar-height: 56px;
+  --sidebar-width: 248px;
+  --content-max: 680px;
+
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@media (min-width: 400px) {
+  :root {
+    --gutter: 20px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* A faint, fixed star field. Invisible by day because --star is transparent. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 12% 8%, var(--star), transparent),
+    radial-gradient(1px 1px at 78% 4%, var(--star), transparent),
+    radial-gradient(1.5px 1.5px at 92% 18%, var(--star), transparent),
+    radial-gradient(1px 1px at 34% 22%, var(--star), transparent),
+    radial-gradient(1px 1px at 58% 14%, var(--star), transparent),
+    radial-gradient(1.5px 1.5px at 6% 36%, var(--star), transparent),
+    radial-gradient(1px 1px at 70% 42%, var(--star), transparent),
+    radial-gradient(1px 1px at 22% 58%, var(--star), transparent),
+    radial-gradient(1px 1px at 88% 64%, var(--star), transparent),
+    radial-gradient(1.5px 1.5px at 46% 76%, var(--star), transparent),
+    radial-gradient(1px 1px at 10% 88%, var(--star), transparent),
+    radial-gradient(1px 1px at 64% 92%, var(--star), transparent);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

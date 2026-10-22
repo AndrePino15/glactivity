@@ -1,0 +1,90 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 100dvh;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + var(--space-6)) var(--gutter)
+    calc(env(safe-area-inset-bottom) + var(--space-7));
+  text-align: center;
+}
+
+.page h1 {
+  font: 700 30px/36px var(--font-rounded);
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  color: var(--text-secondary);
+  font: var(--text-callout);
+}
+
+.lead strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.input {
+  width: 100%;
+  padding: 14px var(--space-4);
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font: var(--text-body);
+  /* 16px+ stops iOS from zooming into the field */
+  font-size: 17px;
+  outline: none;
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.code {
+  font: 600 24px/30px var(--font);
+  letter-spacing: 0.3em;
+  text-align: center;
+}
+
+.button {
+  display: block;
+  width: 100%;
+  padding: 14px var(--space-4);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--on-accent);
+  font: var(--text-headline);
+  text-align: center;
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  opacity: 0.6;
+}
+
+.link {
+  color: var(--accent);
+  font: var(--text-subhead);
+}
+
+.error {
+  color: var(--cat-exam);
+  font: var(--text-footnote);
+}
