@@ -88,3 +88,21 @@
   color: var(--cat-exam);
   font: var(--text-footnote);
 }
+
+.link:disabled {
+  opacity: 0.4;
+}
+
+.links {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-5);
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  color: var(--text);
+  font: var(--text-subhead);
+}
