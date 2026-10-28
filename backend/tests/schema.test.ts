@@ -33,6 +33,12 @@ describe("phase 1 migration", () => {
     ).toBe(8);
   });
 
+  it("keeps the elevated game-seeding function out of users' reach", async () => {
+    await expect(
+      asUser(db, BOB, () => db.query("select public.seed_default_games($1)", [ALICE])),
+    ).rejects.toThrow(/permission denied/);
+  });
+
   it("no longer has a holidays table", async () => {
     expect(await count("select 1 from information_schema.tables where table_name = 'holidays'")).toBe(0);
   });

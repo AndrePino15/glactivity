@@ -39,6 +39,12 @@ begin
 end;
 $$;
 
+-- These run with elevated rights, and Postgres lets everyone execute new
+-- functions by default, which would make them callable through the API.
+-- Only the sign-up trigger needs them.
+revoke execute on function public.seed_default_games(uuid) from public, anon, authenticated;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+
 -- Accounts created before the first migration ran have no profile or games.
 insert into public.profiles (id)
   select id from auth.users

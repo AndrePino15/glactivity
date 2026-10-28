@@ -17,6 +17,7 @@ export async function createTestDb(options: { before?: (db: PGlite) => Promise<v
     create function auth.uid() returns uuid language sql stable as $$
       select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
     $$;
+    create role anon;
     create role authenticated;
     grant usage on schema auth to authenticated;
   `);
