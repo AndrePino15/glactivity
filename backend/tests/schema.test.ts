@@ -101,6 +101,17 @@ describe("calendar sync", () => {
   });
 });
 
+describe("advisor fixes", () => {
+  it("still stamps updated_at with the pinned search path", async () => {
+    await asUser(db, ALICE, () => db.query("update public.profiles set display_name = 'André' where id = $1", [ALICE]));
+    const { rows } = await db.query<{ fresh: boolean }>(
+      "select updated_at > created_at as fresh from public.profiles where id = $1",
+      [ALICE],
+    );
+    expect(rows[0].fresh).toBe(true);
+  });
+});
+
 describe("album of the week", () => {
   it("only accepts weeks starting on a Monday", async () => {
     await asUser(db, ALICE, async () => {
