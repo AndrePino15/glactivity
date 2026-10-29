@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { Cover } from "@/components/Cover";
-import { Button, List, Note, Row, Section, Sheet, TextButton, TextField } from "@/components/ui";
+import { Button, List, Note, Row, Section, Sheet, TextButton, TextField, TextLink } from "@/components/ui";
 import { write } from "@/lib/db/client";
 import { useList } from "@/lib/db/hooks";
 import type { ItemStatus, ListItem } from "@/lib/db/types";
@@ -206,9 +206,9 @@ function ItemActions({ item, copy, onDone }: { item: ListItem; copy: Copy; onDon
           Remove
         </TextButton>
         {item.meta.url && (
-          <a className={styles.link} href={item.meta.url} target="_blank" rel="noreferrer">
+          <TextLink href={item.meta.url} external>
             Open link
-          </a>
+          </TextLink>
         )}
       </div>
     </div>

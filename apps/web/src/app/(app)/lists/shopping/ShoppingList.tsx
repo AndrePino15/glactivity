@@ -6,7 +6,8 @@ import { write } from "@/lib/db/client";
 import { useList, useProfile, useToday } from "@/lib/db/hooks";
 import type { ListItem } from "@/lib/db/types";
 import { fromISODate } from "@/lib/dates";
-import styles from "./lists.module.css";
+import { clearTickedBefore } from "@/lib/shopping";
+import styles from "../lists.module.css";
 
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -20,12 +21,12 @@ export function ShoppingList() {
   const open = items.filter((i) => i.status !== "done");
   const basket = items.filter((i) => i.status === "done");
 
-  // Ticked items are cleared the day after they were ticked.
+  // Ticked items stay in the basket until shopping day is over.
   useEffect(() => {
-    if (!loaded || !today) return;
-    const startOfToday = fromISODate(today).getTime();
+    if (!loaded || !today || !profile) return;
+    const cutoff = fromISODate(clearTickedBefore(today, profile.shopping_day)).getTime();
     const old = items.filter(
-      (i) => i.status === "done" && i.completed_at && new Date(i.completed_at).getTime() < startOfToday,
+      (i) => i.status === "done" && i.completed_at && new Date(i.completed_at).getTime() < cutoff,
     );
     if (!old.length) return;
     const ids = old.map((i) => i.id);
@@ -36,7 +37,7 @@ export function ShoppingList() {
       },
       { optimisticData: items.filter((i) => !ids.includes(i.id)), revalidate: true },
     );
-  }, [loaded, today, items, mutate]);
+  }, [loaded, today, profile, items, mutate]);
 
   async function add(event: FormEvent) {
     event.preventDefault();
@@ -129,7 +130,7 @@ export function ShoppingList() {
       {profile && items.length > 0 && (
         <div className={styles.footnote}>
           <Note>
-            Shopping day is {WEEKDAYS[profile.shopping_day]}. Ticked items clear the next day.
+            Shopping day is {WEEKDAYS[profile.shopping_day]}. Ticked items clear once it’s over.
           </Note>
         </div>
       )}

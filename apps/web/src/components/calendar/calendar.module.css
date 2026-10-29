@@ -8,3 +8,48 @@
   font: 500 15px/20px var(--font);
   font-variant-numeric: tabular-nums;
 }
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.when {
+  font: var(--text-headline);
+}
+
+.times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-body);
+}
+
+.toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.danger {
+  color: var(--cat-exam);
+}
+
+.error {
+  color: var(--cat-exam);
+  font: var(--text-footnote);
+}

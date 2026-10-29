@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, addMonths, daysBetween, relativeDay, startOfWeek } from "./dates";
+import { addDays, addMonths, daysBetween, monthGrid, relativeDay, startOfWeek } from "./dates";
 
 describe("dates", () => {
   it("adds days across month and year ends", () => {
@@ -29,5 +29,19 @@ describe("dates", () => {
     expect(relativeDay("2026-10-22", "2026-10-23")).toBe("tomorrow");
     expect(relativeDay("2026-10-22", "2026-10-27")).toBe("in 5 days");
     expect(relativeDay("2026-10-22", "2026-10-20")).toBe("2 days ago");
+  });
+});
+
+describe("monthGrid", () => {
+  it("starts on the Monday before the 1st and covers six weeks", () => {
+    const grid = monthGrid("2026-10-29");
+    expect(grid[0]).toBe("2026-09-28");
+    expect(grid).toHaveLength(42);
+    expect(grid[41]).toBe("2026-11-08");
+    expect(grid).toContain("2026-10-31");
+  });
+
+  it("starts on the 1st when the month begins on a Monday", () => {
+    expect(monthGrid("2027-02-10")[0]).toBe("2027-02-01");
   });
 });

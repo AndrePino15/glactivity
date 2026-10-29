@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapItunes, mapOpenLibrary, searchUrl } from "./search";
+import { bestMatch, mapItunes, mapOpenLibrary, searchUrl } from "./search";
 
 describe("search mapping", () => {
   it("turns iTunes albums into title, artist, large artwork and Apple Music link", () => {
@@ -45,5 +45,26 @@ describe("search mapping", () => {
 
   it("searches the UK store", () => {
     expect(searchUrl("albums", "in rainbows")).toContain("term=in%20rainbows&media=music&entity=album&country=GB");
+  });
+});
+
+describe("bestMatch", () => {
+  const result = (title: string) => ({ title, subtitle: null, artwork: null, url: null, year: null });
+
+  it("prefers an exact title, then an edition of it", () => {
+    expect(bestMatch([result("In Rainbows (Deluxe Edition)"), result("In Rainbows")], "in rainbows")?.title).toBe(
+      "In Rainbows",
+    );
+    expect(bestMatch([result("In Rainbows (Deluxe Edition)")], "In Rainbows")?.title).toBe(
+      "In Rainbows (Deluxe Edition)",
+    );
+  });
+
+  it("ignores accents and punctuation", () => {
+    expect(bestMatch([result("Amélie")], "amelie")?.title).toBe("Amélie");
+  });
+
+  it("returns nothing rather than a different title", () => {
+    expect(bestMatch([result("Rainbows End")], "In Rainbows")).toBeNull();
   });
 });

@@ -53,6 +53,13 @@ Big features are developed on a branch and merged to `main` at each milestone.
   - Lists: shopping (instant add, ticked items clear the next day), reminders (weekly/monthly/yearly, shown on Today ahead of time), watch/read/listen with cover search
   - Fun: album of the week (picked every Monday from your Listen list, Apple Music link, pick another), daily games that mark themselves played when opened
   - England + Portugal holidays, where-am-I switch, automatic break detection
+  - **Follow-up round (your feedback):**
+    - Today became the heart of the app: schedule, then reminders (or "No reminders for today"), a large album-of-the-week card with the current book and next film beside it, and daily games as an icon grid.
+    - Drawn game icons, plus Krillion; games can be added and edited in Settings.
+    - Timetable gained Day / Week / Month views and your own events.
+    - Lists became a hub: every list is one line with its own add box. Reminders understand phrases like "Rent the 1st every month".
+    - Ticked shopping items clear once shopping day is over.
+    - Everything tappable highlights on hover.
   - Not yet: phone notifications for reminders. They need push keys and a scheduled job, so they move to Phase 2. Until then, reminders appear on Today.
 - [ ] **Phase 2 – Lifestyle:** workout plans and options, meal plan → shopping list, term/break/exam modes driving suggestions, push notifications for reminders.
 - [ ] **Phase 3 – Smarter:** rules-based suggestion engine, then an optional Claude daily brief and free-text capture ("gym cancelled, out of eggs").

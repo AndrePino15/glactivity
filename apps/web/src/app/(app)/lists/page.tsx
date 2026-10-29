@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
-import { ShoppingList } from "./ShoppingList";
+import { PageHeader } from "@/components/ui";
+import { ListsHub } from "./ListsHub";
 
-export const metadata: Metadata = { title: "Shopping" };
+export const metadata: Metadata = { title: "Lists" };
 
-export default function ShoppingPage() {
-  return <ShoppingList />;
+export default function ListsPage() {
+  return (
+    <>
+      <PageHeader title="Lists" />
+      <ListsHub />
+    </>
+  );
 }

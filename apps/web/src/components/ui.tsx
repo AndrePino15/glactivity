@@ -1,25 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useRef, type ComponentProps, type ReactNode } from "react";
 import { Mascot, type MascotPose } from "./Mascot";
 import styles from "./ui.module.css";
 
 const cx = (...names: (string | false | null | undefined)[]) => names.filter(Boolean).join(" ");
 
-/** iOS-style large title with an optional small line above and an action on the right. */
+/**
+ * iOS-style large title, with either a small line above it or a back link,
+ * and an optional action on the right.
+ */
 export function PageHeader({
   title,
   eyebrow,
+  back,
   action,
 }: {
   title: ReactNode;
   eyebrow?: ReactNode;
+  back?: { href: string; label: string };
   action?: ReactNode;
 }) {
   return (
     <header className={styles.header}>
       <div>
+        {back && (
+          <Link href={back.href} className={styles.back}>
+            <ChevronLeft size={18} strokeWidth={2} aria-hidden />
+            {back.label}
+          </Link>
+        )}
         {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
         <h1 className={styles.title}>{title}</h1>
       </div>
@@ -135,6 +147,29 @@ export function Button({ className, ...props }: ComponentProps<"button">) {
 /** Plain text action, for secondary choices. */
 export function TextButton({ className, ...props }: ComponentProps<"button">) {
   return <button type="button" className={cx(styles.textButton, className)} {...props} />;
+}
+
+/** A link that looks like a text action. */
+export function TextLink({
+  href,
+  external,
+  className,
+  children,
+}: {
+  href: string;
+  external?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  return external ? (
+    <a href={href} target="_blank" rel="noreferrer" className={cx(styles.textButton, className)}>
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={cx(styles.textButton, className)}>
+      {children}
+    </Link>
+  );
 }
 
 export function TextField({ className, ...props }: ComponentProps<"input">) {

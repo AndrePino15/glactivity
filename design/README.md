@@ -36,3 +36,5 @@ Type follows Apple's text styles (`--text-large-title` 34pt down to `--text-capt
 - No boxes or icon tiles for their own sake. Content sits on the page as rows with hairline dividers (`List` / `Row` in `apps/web/src/components/ui.tsx`).
 - Space separates sections; a section only renders when it has something to show.
 - One primary button per screen (ink/cream). Everything else is a plain text action.
+- Everything tappable shows a soft highlight on hover (pointer devices only), so you can see what you're about to press.
+- Daily games use small drawn icons (`apps/web/src/components/fun/GameIcon.tsx`) that echo each game's look without copying its logo.

@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { Cover } from "@/components/Cover";
-import { List, Note, Row, Section, TextButton } from "@/components/ui";
+import { List, Note, Row, TextButton, TextLink } from "@/components/ui";
 import { useAlbumOfTheWeek } from "@/lib/album";
 import type { ISODate } from "@/lib/dates";
 import styles from "./fun.module.css";
@@ -18,9 +17,7 @@ export function AlbumFeature({ today }: { today: ISODate | null }) {
     ) : (
       <Note>
         Add albums to your{" "}
-        <Link href="/lists/listen" className={styles.inlineLink}>
-          Listen list
-        </Link>{" "}
+        <TextLink href="/lists/listen">Listen list</TextLink>{" "}
         and one will be picked every Monday.
       </Note>
     );
@@ -48,9 +45,9 @@ export function AlbumFeature({ today }: { today: ISODate | null }) {
         </div>
         <div className={styles.featureActions}>
           {current.apple_music_url && (
-            <a href={current.apple_music_url} target="_blank" rel="noreferrer" className={styles.inlineLink}>
+            <TextLink href={current.apple_music_url} external>
               Listen on Apple Music
-            </a>
+            </TextLink>
           )}
           {canReroll && <TextButton onClick={reroll}>Pick another</TextButton>}
         </div>
@@ -74,24 +71,5 @@ export function AlbumFeature({ today }: { today: ISODate | null }) {
         </div>
       )}
     </>
-  );
-}
-
-/** The compact version for Today; hidden until there's an album. */
-export function AlbumRow({ today }: { today: ISODate | null }) {
-  const { current } = useAlbumOfTheWeek(today);
-  if (!current) return null;
-  return (
-    <Section title="Album of the week">
-      <List>
-        <Row
-          leading={<Cover src={current.artwork_url} size={56} />}
-          title={current.title}
-          detail={current.artist}
-          href={current.apple_music_url ?? "/fun"}
-          external={Boolean(current.apple_music_url)}
-        />
-      </List>
-    </Section>
   );
 }

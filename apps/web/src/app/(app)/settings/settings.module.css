@@ -16,14 +16,6 @@
   gap: var(--space-3) var(--space-5);
 }
 
-.link {
-  font: 600 15px/20px var(--font);
-  text-decoration: underline;
-  text-decoration-color: var(--separator);
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 4px;
-}
-
 .danger {
   color: var(--cat-exam);
 }
@@ -31,4 +23,11 @@
 .error {
   color: var(--cat-exam);
   font: var(--text-footnote);
+}
+
+.sheetActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }

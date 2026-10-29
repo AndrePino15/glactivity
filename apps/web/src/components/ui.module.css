@@ -308,3 +308,70 @@ button.rowMain:active {
     border-radius: 20px;
   }
 }
+
+/*
+ * Hover: on devices with a pointer, everything tappable shows a soft
+ * highlight before you click. Rows get a rounded wash that reaches a little
+ * past the text so the layout doesn't move.
+ */
+.row {
+  position: relative;
+  isolation: isolate;
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  inset: 3px -10px;
+  z-index: -1;
+  border-radius: 10px;
+  background: var(--fill);
+  opacity: 0;
+  transition: opacity 0.15s var(--ease);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .row:has(> a.rowMain:hover, > button.rowMain:hover)::before {
+    opacity: 1;
+  }
+
+  .button:not(:disabled):hover {
+    opacity: 0.86;
+  }
+
+  .textButton:not(:disabled):hover {
+    text-decoration-color: currentColor;
+  }
+
+  .segment[aria-checked="false"]:hover {
+    background: var(--fill);
+  }
+
+  .check:hover {
+    border-color: var(--text-secondary);
+  }
+
+  .field:hover:not(:focus) {
+    border-color: var(--fill-strong);
+  }
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 4px -4px;
+  padding: 2px 6px 2px 2px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font: 500 15px/20px var(--font);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+@media (hover: hover) {
+  .back:hover {
+    background: var(--fill);
+    color: var(--text);
+  }
+}

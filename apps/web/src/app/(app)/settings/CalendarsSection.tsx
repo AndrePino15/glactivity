@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
-import { Button, Label, List, Note, Row, Select, Sheet, TextButton, TextField } from "@/components/ui";
+import { Button, Label, List, Note, Row, Select, Sheet, TextButton, TextField, TextLink } from "@/components/ui";
 import { write } from "@/lib/db/client";
 import { syncCalendars, useSources } from "@/lib/db/hooks";
 import type { CalendarSource, EventCategory } from "@/lib/db/types";
@@ -52,9 +51,7 @@ export function CalendarsSection() {
       )}
       <div className={styles.actions}>
         <TextButton onClick={() => setSheet("new")}>Add calendar link</TextButton>
-        <Link href="/settings/exams" className={styles.link}>
-          Paste exam timetable
-        </Link>
+        <TextLink href="/settings/exams">Paste exam timetable</TextLink>
         {sources.some((s) => s.kind === "ics") && (
           <TextButton onClick={syncNow} disabled={syncing}>
             {syncing ? "Updating…" : "Update now"}

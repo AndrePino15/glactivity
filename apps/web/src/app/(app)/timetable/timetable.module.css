@@ -1,20 +1,44 @@
-.weekNav {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.weekNav button {
+.iconButton {
   display: grid;
   place-items: center;
   width: 36px;
   height: 36px;
+  border-radius: 50%;
   color: var(--text-secondary);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
 }
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: calc(var(--space-6) * -0.5) 0 var(--space-5);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.heading {
+  min-width: 0;
+  overflow: hidden;
+  font: 600 17px/22px var(--font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.todayButton {
+  margin-left: auto;
+}
+
+/* Day view: week strip */
 
 .strip {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin: calc(var(--space-6) * -0.5) 0 var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
 .day {
@@ -60,6 +84,128 @@
   background: var(--text-tertiary);
 }
 
+/* Week view: one block per day */
+
+.weekList {
+  display: flex;
+  flex-direction: column;
+}
+
+.weekDay {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 0.5px solid var(--separator);
+}
+
+.weekDay:first-child {
+  border-top: 0.5px solid var(--separator);
+}
+
+.weekDayHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: start;
+  padding: 4px 0;
+  border-radius: 10px;
+  transition: background 0.15s var(--ease);
+}
+
+.weekDayName {
+  color: var(--text-tertiary);
+  font: 600 12px/16px var(--font);
+  text-transform: uppercase;
+}
+
+.weekDayNumber {
+  font: 600 20px/26px var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+.weekDay[data-today] .weekDayName,
+.weekDay[data-today] .weekDayNumber {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* Inside the week view the day's agenda doesn't need its own outer lines. */
+.weekDayBody ul > li:first-child {
+  border-top: none;
+}
+
+.weekDayBody ul > li:last-child {
+  border-bottom: none;
+}
+
+.weekDayBody > p {
+  padding-top: 8px;
+  color: var(--text-tertiary);
+}
+
+/* Month view */
+
+.month {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 2px;
+  margin-bottom: var(--space-5);
+}
+
+.monthHead {
+  padding-bottom: var(--space-2);
+  color: var(--text-tertiary);
+  font: 600 12px/16px var(--font);
+  text-align: center;
+}
+
+.monthDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0 6px;
+  border-radius: 10px;
+  transition: background 0.15s var(--ease);
+}
+
+.monthNumber {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font: 500 16px/1 var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+.monthDay[data-outside] .monthNumber {
+  color: var(--text-tertiary);
+}
+
+.monthDay[data-today] .monthNumber {
+  font-weight: 700;
+}
+
+.monthDay[aria-pressed="true"] .monthNumber {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.monthDots {
+  display: flex;
+  gap: 3px;
+  height: 5px;
+}
+
+.monthDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cat);
+}
+
 .breakNote {
   margin-bottom: var(--space-3);
   color: var(--text-secondary);
@@ -70,10 +216,23 @@
   margin-top: var(--space-6);
 }
 
-.link {
-  color: var(--text);
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-color: var(--separator);
-  text-underline-offset: 3px;
+@media (hover: hover) {
+  .iconButton:hover {
+    background: var(--fill);
+    color: var(--text);
+  }
+
+  .day:hover .dayNumber,
+  .monthDay:hover .monthNumber {
+    background: var(--fill);
+  }
+
+  .day[aria-selected="true"]:hover .dayNumber,
+  .monthDay[aria-pressed="true"]:hover .monthNumber {
+    background: var(--accent);
+  }
+
+  .weekDayHead:hover {
+    background: var(--fill);
+  }
 }

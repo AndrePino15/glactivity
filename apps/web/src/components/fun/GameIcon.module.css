@@ -1,0 +1,17 @@
+.icon {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 9px;
+  box-shadow: 0 0 0 0.5px var(--separator);
+}
+
+.letter {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--fill-strong);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-family: var(--font-rounded);
+}

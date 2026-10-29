@@ -1,10 +1,9 @@
 "use client";
 
 import { DayAgenda } from "@/components/calendar/DayAgenda";
-import { Cover } from "@/components/Cover";
-import { AlbumRow } from "@/components/fun/AlbumOfTheWeek";
 import { DailyGames } from "@/components/fun/DailyGames";
-import { Button, Check, List, Row, Section, TextButton } from "@/components/ui";
+import { Button, Check, List, Note, Row, Section, TextButton } from "@/components/ui";
+import { TodayMedia } from "./TodayMedia";
 import { breakToAskAbout } from "@/lib/calendar/breaks";
 import { breakOn, eventsOn, holidaysOn } from "@/lib/calendar/day";
 import { formatShortDay, fromISODate, relativeDay, type ISODate } from "@/lib/dates";
@@ -34,7 +33,6 @@ export function TodayContent() {
   const { data: sources, loaded: sourcesLoaded } = useSources();
   const reminders = useReminders();
   const shopping = useList("shopping");
-  const books = useList("books");
 
   if (!today) return null;
   const home = profile?.current_country ?? "GB";
@@ -45,7 +43,6 @@ export function TodayContent() {
   );
   const toBuy = shopping.data.filter((i) => i.status === "open");
   const shoppingDay = profile ? daysUntilWeekday(today, profile.shopping_day) : null;
-  const reading = books.data.filter((b) => b.status === "active");
 
   async function answerBreak(period: Period, country: Country) {
     await write((db) => db.from("periods").update({ confirmed: true, country }).eq("id", period.id));
@@ -86,8 +83,10 @@ export function TodayContent() {
         />
       </Section>
 
-      {due.length > 0 && (
-        <Section title="Coming up">
+      <Section title="Reminders">
+        {due.length === 0 ? (
+          <Note>No reminders for today.</Note>
+        ) : (
           <List>
             {due.map(({ reminder, due: on, days }) => (
               <Row
@@ -99,8 +98,8 @@ export function TodayContent() {
               />
             ))}
           </List>
-        </Section>
-      )}
+        )}
+      </Section>
 
       {toBuy.length > 0 && shoppingDay !== null && shoppingDay <= 1 && (
         <Section title="Shopping">
@@ -109,31 +108,15 @@ export function TodayContent() {
               title={shoppingDay === 0 ? "It’s shopping day" : "Shopping tomorrow"}
               detail={toBuy.slice(0, 4).map((i) => i.title).join(", ") + (toBuy.length > 4 ? "…" : "")}
               trailing={`${toBuy.length} item${toBuy.length === 1 ? "" : "s"}`}
-              href="/lists"
+              href="/lists/shopping"
             />
           </List>
         </Section>
       )}
 
-      <AlbumRow today={today} />
+      <TodayMedia today={today} />
 
-      <DailyGames today={today} onlyUnplayed />
-
-      {reading.length > 0 && (
-        <Section title="Reading">
-          <List>
-            {reading.map((book) => (
-              <Row
-                key={book.id}
-                leading={<Cover src={book.meta.artwork} size={40} shape="portrait" />}
-                title={book.title}
-                detail={book.subtitle}
-                href="/lists/read"
-              />
-            ))}
-          </List>
-        </Section>
-      )}
+      <DailyGames today={today} layout="grid" />
     </>
   );
 }

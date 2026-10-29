@@ -58,3 +58,25 @@ export function searchUrl(kind: SearchKind, query: string): string {
       return `https://openlibrary.org/search.json?q=${q}&limit=12&fields=key,title,author_name,cover_i,first_publish_year`;
   }
 }
+
+const normalise = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+/**
+ * The result that is clearly the title that was typed ("In Rainbows" matches
+ * "In Rainbows (Deluxe Edition)"), or null so nothing wrong gets attached.
+ */
+export function bestMatch(results: SearchResult[], typed: string): SearchResult | null {
+  const want = normalise(typed);
+  if (!want) return null;
+  return (
+    results.find((r) => normalise(r.title) === want) ??
+    results.find((r) => normalise(r.title).startsWith(`${want} `)) ??
+    null
+  );
+}

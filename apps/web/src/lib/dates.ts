@@ -66,3 +66,17 @@ export function relativeDay(from: ISODate, to: ISODate): string {
   if (days === -1) return "yesterday";
   return days > 0 ? `in ${days} days` : `${-days} days ago`;
 }
+
+/** The 6 weeks (Monday first) shown for the month containing this day. */
+export function monthGrid(iso: ISODate): ISODate[] {
+  const first = startOfWeek(`${iso.slice(0, 8)}01`);
+  return Array.from({ length: 42 }, (_, i) => addDays(first, i));
+}
+
+/** Local midnight + "HH:MM" → an ISO timestamp. */
+export function toTimestamp(day: ISODate, time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const date = fromISODate(day);
+  date.setHours(h, m, 0, 0);
+  return date.toISOString();
+}

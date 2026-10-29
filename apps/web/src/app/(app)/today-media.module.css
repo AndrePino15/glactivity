@@ -1,0 +1,136 @@
+.media {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-7);
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font: 600 12px/16px var(--font);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.albumLink {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  transition: transform 0.15s var(--ease);
+}
+
+.albumLink:active {
+  transform: scale(0.98);
+}
+
+.albumCover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  margin-bottom: var(--space-2);
+  border-radius: 12px;
+  background: var(--fill);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.16), 0 0 0 0.5px var(--separator);
+  transition: box-shadow 0.2s var(--ease);
+}
+
+.emptyCover {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  box-shadow: none;
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+  text-align: center;
+}
+
+.albumTitle {
+  overflow: hidden;
+  font: 600 17px/22px var(--font);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.albumArtist {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: 22px;
+}
+
+.sideItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: -6px;
+  padding: 6px;
+  border-radius: 12px;
+  transition: background 0.15s var(--ease);
+}
+
+.sideItem:active {
+  opacity: 0.6;
+}
+
+.sideText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sideText .label {
+  margin-bottom: 2px;
+}
+
+.sideTitle {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 600 15px/19px var(--font);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sideDetail {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font: var(--text-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sideEmpty {
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+  text-decoration: underline;
+  text-decoration-color: var(--separator);
+  text-underline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .albumLink:hover .albumCover {
+    box-shadow: 0 14px 34px rgb(0 0 0 / 0.22), 0 0 0 0.5px var(--separator);
+  }
+
+  .sideItem:hover {
+    background: var(--fill);
+  }
+}
+
+/* On wide screens the album stays a comfortable size instead of filling half the page. */
+@media (min-width: 700px) {
+  .media {
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}

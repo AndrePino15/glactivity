@@ -12,10 +12,12 @@ export function DayAgenda({
   events,
   holidays,
   empty = "Nothing on.",
+  onSelect,
 }: {
   events: CalendarEvent[];
   holidays: Holiday[];
   empty?: string;
+  onSelect?: (event: CalendarEvent) => void;
 }) {
   if (events.length === 0 && holidays.length === 0) return <Note>{empty}</Note>;
   return (
@@ -34,6 +36,7 @@ export function DayAgenda({
           leading={<Time category={e.category}>{e.all_day ? "All day" : formatTime(e.starts_at)}</Time>}
           title={e.title}
           detail={[e.all_day ? null : `until ${formatTime(e.ends_at)}`, e.location].filter(Boolean).join(" · ")}
+          onClick={onSelect ? () => onSelect(e) : undefined}
         />
       ))}
     </List>

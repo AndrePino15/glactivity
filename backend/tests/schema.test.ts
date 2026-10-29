@@ -18,7 +18,10 @@ beforeAll(async () => {
 describe("new users", () => {
   it("get a profile and the starter daily games", async () => {
     expect(await count("select 1 from public.profiles")).toBe(2);
-    expect(await count("select 1 from public.games where user_id = $1", [ALICE])).toBe(8);
+    expect(await count("select 1 from public.games where user_id = $1", [ALICE])).toBe(9);
+    expect(
+      await count("select 1 from public.games where user_id = $1 and name = 'Krillion'", [ALICE]),
+    ).toBe(1);
   });
 });
 
@@ -30,7 +33,7 @@ describe("phase 1 migration", () => {
     expect(await fresh.query("select 1 from public.profiles").then((r) => r.rows.length)).toBe(1);
     expect(
       await fresh.query("select 1 from public.games where user_id = $1", [ALICE]).then((r) => r.rows.length),
-    ).toBe(8);
+    ).toBe(9);
   });
 
   it("keeps the elevated game-seeding function out of users' reach", async () => {
