@@ -81,6 +81,7 @@ export type Reminder = {
   recurrence: Recurrence;
   notify_days_before: number;
   last_done_on: string | null;
+  last_notified_on?: string | null;
   archived: boolean;
 };
 
@@ -103,3 +104,40 @@ export type Game = {
 };
 
 export type GamePlay = { game_id: string; played_on: string };
+
+export type WorkoutKind = "gym" | "home" | "run" | "sport" | "rest";
+
+export type WorkoutPlanDay = {
+  id: string;
+  weekday: number; // 0 = Sunday … 6 = Saturday
+  title: string;
+  kind: WorkoutKind;
+  preferred_time: string | null; // "HH:MM:SS"
+  details: string | null;
+};
+
+export type WorkoutLog = {
+  id: string;
+  day: string;
+  title: string;
+  kind: WorkoutKind;
+  status: "done" | "skipped";
+  notes: string | null;
+};
+
+export type MealSlot = "lunch" | "dinner";
+
+export type Meal = {
+  id: string;
+  name: string;
+  ingredients: string[];
+  notes: string | null;
+};
+
+export type MealPlanEntry = {
+  id: string;
+  day: string;
+  slot: MealSlot;
+  title: string;
+  meal_id: string | null;
+};

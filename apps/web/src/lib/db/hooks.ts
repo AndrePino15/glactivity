@@ -14,9 +14,13 @@ import type {
   GamePlay,
   ListItem,
   ListKind,
+  Meal,
+  MealPlanEntry,
   Period,
   Profile,
   Reminder,
+  WorkoutLog,
+  WorkoutPlanDay,
 } from "./types";
 
 /** Today's date on this device, or null while prerendering. */
@@ -112,6 +116,32 @@ export function useAlbumPicks() {
   return useDb<AlbumPick[]>(
     "album-picks",
     (db) => db.from("album_picks").select("*").order("week_start", { ascending: false }).limit(12),
+    [],
+  );
+}
+
+export function useWorkoutPlan() {
+  return useDb<WorkoutPlanDay[]>("workout-plan", (db) => db.from("workout_plan").select("*").order("weekday"), []);
+}
+
+/** Workout logs for days in [from, to]. */
+export function useWorkoutLogs(from: ISODate | null, to: ISODate | null) {
+  return useDb<WorkoutLog[]>(
+    from && to ? `workout-logs:${from}:${to}` : null,
+    (db) => db.from("workout_logs").select("*").gte("day", from!).lte("day", to!).order("day", { ascending: false }),
+    [],
+  );
+}
+
+export function useMeals() {
+  return useDb<Meal[]>("meals", (db) => db.from("meals").select("*").order("name"), []);
+}
+
+/** Planned meals for days in [from, to]. */
+export function useMealPlan(from: ISODate | null, to: ISODate | null) {
+  return useDb<MealPlanEntry[]>(
+    from && to ? `meal-plan:${from}:${to}` : null,
+    (db) => db.from("meal_plan").select("*").gte("day", from!).lte("day", to!).order("day"),
     [],
   );
 }

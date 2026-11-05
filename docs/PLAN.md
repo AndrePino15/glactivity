@@ -61,7 +61,11 @@ Big features are developed on a branch and merged to `main` at each milestone.
     - Ticked shopping items clear once shopping day is over.
     - Everything tappable highlights on hover.
   - Not yet: phone notifications for reminders. They need push keys and a scheduled job, so they move to Phase 2. Until then, reminders appear on Today.
-- [ ] **Phase 2 – Lifestyle:** workout plans and options, meal plan → shopping list, term/break/exam modes driving suggestions, push notifications for reminders.
+- [x] **Phase 2 – Lifestyle**
+  - Training: pick a starter week (Push/Pull/Legs + runs, Upper/Lower, Full body, or empty), edit any day; Today shows the session with a free time that fits around lectures, the exercises, and Done / Did something else / Skip
+  - Meals: lunch and dinner for each day, saved meals with ingredients; planning one adds its missing ingredients to the shopping list
+  - Modes: exams in the next week go to the top of Today and lighten workouts; in Portugal the gym becomes home or a run, and shopping-day nudges pause
+  - Reminder notifications to your phone each morning (see `docs/notifications.md`)
 - [ ] **Phase 3 – Smarter:** rules-based suggestion engine, then an optional Claude daily brief and free-text capture ("gym cancelled, out of eggs").
 - [ ] **Phase 4 – SwiftUI app** for iPhone/iPad, plus Apple Health auto-logging of workouts.
 - [ ] **Phase 5 – ESP32 alarm** so the phone can stay out of the bedroom.

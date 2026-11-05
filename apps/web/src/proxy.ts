@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isSupabaseConfigured, supabaseKey, supabaseUrl } from "@/lib/supabase/config";
 
-const PUBLIC_PATHS = ["/login"];
+// The daily reminder job is called by the database, not a signed-in browser;
+// it checks its own token.
+const PUBLIC_PATHS = ["/login", "/api/cron"];
 
 /**
  * Keeps the Supabase session fresh and sends signed-out visitors to /login.
@@ -53,6 +55,6 @@ function redirectKeepingCookies(url: URL, from: NextResponse) {
 export const config = {
   matcher: [
     // Everything except Next internals, the manifest, icons and other static files.
-    "/((?!_next/static|_next/image|manifest.webmanifest|icon|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|webp|ico|txt)$).*)",
+    "/((?!_next/static|_next/image|manifest.webmanifest|sw.js|icon|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|webp|ico|txt)$).*)",
   ],
 };

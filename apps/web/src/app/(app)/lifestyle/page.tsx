@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { LifestyleContent } from "./LifestyleContent";
 
-export const metadata: Metadata = { title: "Lifestyle" };
+export const metadata: Metadata = { title: "Training" };
 
-export default function LifestylePage() {
-  return (
-    <>
-      <PageHeader title="Lifestyle" />
-      <EmptyState pose="snacking" title="Workouts and meals are next">Your workout plan, gym options and weekly meal plan arrive in the next update.</EmptyState>
-    </>
-  );
+export default function TrainingPage() {
+  return <LifestyleContent tab="training" />;
 }

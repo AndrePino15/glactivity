@@ -1,0 +1,28 @@
+.nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: calc(var(--space-6) * -0.5) 0 var(--space-6);
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--fill-strong);
+}
+
+.tab {
+  padding: 7px 4px;
+  border-radius: 8px;
+  font: 500 14px/18px var(--font);
+  text-align: center;
+  transition: background 0.2s var(--ease);
+}
+
+.tab[aria-current="page"] {
+  background: var(--surface-raised);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  font-weight: 600;
+}
+
+@media (hover: hover) {
+  .tab:not([aria-current="page"]):hover {
+    background: var(--fill);
+  }
+}

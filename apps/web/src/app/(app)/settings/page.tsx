@@ -5,6 +5,7 @@ import { AppearancePicker } from "./AppearancePicker";
 import { CalendarsSection } from "./CalendarsSection";
 import { GamesSection } from "./GamesSection";
 import { HomeSettings } from "./HomeSettings";
+import { NotificationsSection } from "./NotificationsSection";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -14,6 +15,9 @@ export default function SettingsPage() {
       <PageHeader title="Settings" />
       <Section title="Calendars">
         <CalendarsSection />
+      </Section>
+      <Section title="Notifications">
+        <NotificationsSection />
       </Section>
       <HomeSettings />
       <Section title="Daily games">

@@ -2,11 +2,13 @@
 
 import { DayAgenda } from "@/components/calendar/DayAgenda";
 import { DailyGames } from "@/components/fun/DailyGames";
+import { TodayMeals } from "@/components/lifestyle/TodayMeals";
+import { TodayWorkout } from "@/components/lifestyle/TodayWorkout";
 import { Button, Check, List, Note, Row, Section, TextButton } from "@/components/ui";
 import { TodayMedia } from "./TodayMedia";
 import { breakToAskAbout } from "@/lib/calendar/breaks";
 import { breakOn, eventsOn, holidaysOn } from "@/lib/calendar/day";
-import { formatShortDay, fromISODate, relativeDay, type ISODate } from "@/lib/dates";
+import { addDays, formatShortDay, formatTime, fromISODate, relativeDay, toISODate, type ISODate } from "@/lib/dates";
 import { write } from "@/lib/db/client";
 import {
   useCalendarAutoSync,
@@ -20,6 +22,7 @@ import {
   useToday,
 } from "@/lib/db/hooks";
 import type { Country, Period, Reminder } from "@/lib/db/types";
+import { modeOn } from "@/lib/modes";
 import { upcomingReminders } from "@/lib/reminders";
 import styles from "./today.module.css";
 
@@ -28,7 +31,8 @@ export function TodayContent() {
   const today = useToday();
   const { data: profile } = useProfile();
   const { data: periods, mutate: mutatePeriods } = usePeriods();
-  const { data: events } = useEvents(today, today);
+  // A week ahead, so upcoming exams can put the day into exam mode.
+  const { data: events } = useEvents(today, today ? addDays(today, 7) : null);
   const holidays = useHolidays(today, today);
   const { data: sources, loaded: sourcesLoaded } = useSources();
   const reminders = useReminders();
@@ -43,6 +47,8 @@ export function TodayContent() {
   );
   const toBuy = shopping.data.filter((i) => i.status === "open");
   const shoppingDay = profile ? daysUntilWeekday(today, profile.shopping_day) : null;
+  const todaysEvents = eventsOn(today, events);
+  const mode = modeOn(today, events, periods, home);
 
   async function answerBreak(period: Period, country: Country) {
     await write((db) => db.from("periods").update({ confirmed: true, country }).eq("id", period.id));
@@ -74,14 +80,37 @@ export function TodayContent() {
         </section>
       )}
 
+      {mode.exams.length > 0 && (
+        <Section title="Exams coming up">
+          <List>
+            {mode.exams.map((exam) => {
+              const day = toISODate(new Date(exam.starts_at));
+              return (
+                <Row
+                  key={exam.id}
+                  title={exam.title}
+                  detail={`${formatShortDay(day)} · ${formatTime(exam.starts_at)}${exam.location ? ` · ${exam.location}` : ""}`}
+                  trailing={relativeDay(today, day)}
+                  href="/timetable"
+                />
+              );
+            })}
+          </List>
+        </Section>
+      )}
+
       <Section title="Schedule">
         {onBreak?.confirmed && onBreak.country === "PT" && <p className={styles.context}>On break · in Portugal</p>}
         <DayAgenda
-          events={eventsOn(today, events)}
+          events={todaysEvents}
           holidays={holidaysOn(today, holidays, periods, home)}
           empty={sourcesLoaded && sources.length === 0 ? "Add your timetable link in Settings to see lectures here." : "Nothing scheduled today."}
         />
       </Section>
+
+      <TodayWorkout today={today} events={todaysEvents} mode={mode} />
+
+      <TodayMeals today={today} />
 
       <Section title="Reminders">
         {due.length === 0 ? (
@@ -101,7 +130,8 @@ export function TodayContent() {
         )}
       </Section>
 
-      {toBuy.length > 0 && shoppingDay !== null && shoppingDay <= 1 && (
+      {/* No shopping-day nudge while you're home in Portugal. */}
+      {toBuy.length > 0 && shoppingDay !== null && shoppingDay <= 1 && !mode.inPortugal && (
         <Section title="Shopping">
           <List>
             <Row

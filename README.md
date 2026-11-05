@@ -37,3 +37,4 @@ How the pieces fit together: **GitHub** holds the code. **Vercel** builds the co
 4. **Connect Vercel to Supabase:** copy the *Project URL* and the *Publishable key* from Supabase → Project Settings → API (or the *Connect* button). In Vercel → your project → Settings → Environment Variables, add them as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (tick Production and Preview), then **redeploy**. Settings only take effect on the next build.
 5. Vercel → Settings → Build and Deployment: the **Root Directory** must be `apps/web`.
 6. On your iPhone, open the site in Safari → Share → **Add to Home Screen**, then sign in once.
+7. **Notifications (optional):** open Glactivity from the Home Screen → Settings → Notifications → *Turn on for this device*. Then schedule the daily run once, see [`docs/notifications.md`](docs/notifications.md).

@@ -27,7 +27,7 @@ export async function createTestDb(options: { before?: (db: PGlite) => Promise<v
   }
   // Supabase grants these by default; RLS is what actually restricts access.
   await db.exec(`
-    grant usage on schema public to authenticated;
+    grant usage on schema public to authenticated, anon;
     grant all on all tables in schema public to authenticated;
   `);
   return db;
@@ -38,6 +38,16 @@ export async function asUser<T>(db: PGlite, userId: string, fn: () => Promise<T>
   await db.exec(
     `set role authenticated; select set_config('request.jwt.claim.sub', '${userId}', false);`,
   );
+  try {
+    return await fn();
+  } finally {
+    await db.exec("reset role;");
+  }
+}
+
+/** Runs `fn` as a signed-out visitor using the public key. */
+export async function asAnon<T>(db: PGlite, fn: () => Promise<T>): Promise<T> {
+  await db.exec("set role anon; select set_config('request.jwt.claim.sub', '', false);");
   try {
     return await fn();
   } finally {

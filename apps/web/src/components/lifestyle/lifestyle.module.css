@@ -1,0 +1,205 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: 400 16px/22px var(--font);
+  resize: vertical;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: var(--text-secondary);
+}
+
+.spaced {
+  margin-top: var(--space-4);
+}
+
+.count {
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+}
+
+.weekday {
+  display: inline-block;
+  width: 36px;
+  color: var(--text-secondary);
+  font: 600 13px/18px var(--font);
+  text-transform: uppercase;
+}
+
+.weekday[data-today] {
+  color: var(--text);
+}
+
+.workout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: var(--space-1);
+}
+
+.workoutTitle {
+  font: 600 20px/25px var(--font);
+}
+
+.workoutMeta {
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+}
+
+.advice {
+  margin-top: var(--space-2);
+  font: var(--text-subhead);
+}
+
+.exercises {
+  margin-top: var(--space-2);
+  padding-left: 0;
+  list-style: none;
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+  columns: 2;
+  column-gap: var(--space-4);
+}
+
+.exercises li {
+  break-inside: avoid;
+  padding: 2px 0;
+}
+
+.workoutActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-4);
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-subhead);
+}
+
+.toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.stepperLabel {
+  font: 600 17px/22px var(--font);
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  transition: background 0.15s var(--ease);
+}
+
+.mealWeek {
+  display: flex;
+  flex-direction: column;
+}
+
+.mealDay {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 0.5px solid var(--separator);
+}
+
+.mealDay:first-child {
+  border-top: 0.5px solid var(--separator);
+}
+
+.mealDayName {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+  color: var(--text-tertiary);
+  font: 600 12px/16px var(--font);
+  text-transform: uppercase;
+}
+
+.mealDayNumber {
+  color: var(--text);
+  font: 600 20px/26px var(--font);
+}
+
+.mealDay[data-today] .mealDayName {
+  color: var(--text);
+}
+
+.mealSlots {
+  display: flex;
+  flex-direction: column;
+}
+
+.mealSlot {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 -10px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  text-align: left;
+  transition: background 0.15s var(--ease);
+}
+
+.slotLabel {
+  display: inline-block;
+  min-width: 56px;
+  color: var(--text-tertiary);
+  font: var(--text-footnote);
+}
+
+.slotMeal {
+  overflow: hidden;
+  font: var(--text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotEmpty {
+  color: var(--text-tertiary);
+  font: var(--text-body);
+}
+
+@media (hover: hover) {
+  .iconButton:hover,
+  .mealSlot:hover {
+    background: var(--fill);
+  }
+}
