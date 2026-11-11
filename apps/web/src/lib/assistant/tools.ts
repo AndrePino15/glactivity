@@ -1,3 +1,5 @@
+import { addDays } from "../dates";
+import { freeTime } from "./freetime";
 import { checkSteps } from "./instructions";
 import { ruleSuggestions, type AgentContext } from "./rules";
 
@@ -37,9 +39,11 @@ const CHANGE = {
     '{type:"add_shopping_items", items:[string]}; ' +
     '{type:"set_meal", day, slot (lunch|dinner), title}; ' +
     '{type:"add_reminder", title, due_on, recurrence? (none|weekly|monthly|yearly), notify_days_before?}; ' +
-    '{type:"add_list_item", list (shopping|movies|books|albums), title, subtitle?}.',
+    '{type:"add_list_item", list (shopping|movies|books|albums), title, subtitle?}; ' +
+    '{type:"add_task", title, due_on?, due_time?, estimate_minutes?, priority? (1 high–3 low), subject?, notes?}. ' +
+    "(Study blocks go through plan_blocks, which follows the autonomy setting.)",
   properties: {
-    type: { type: "string", enum: ["add_event", "add_shopping_items", "set_meal", "add_reminder", "add_list_item"] },
+    type: { type: "string", enum: ["add_event", "add_shopping_items", "set_meal", "add_reminder", "add_list_item", "add_task"] },
   },
   required: ["type"],
 };
@@ -50,6 +54,7 @@ export const TOOLS: Tool[] = [
     title: "Read Glactivity",
     description:
       "Everything about the owner's days in one call: today's date and time zone, timetable events, terms/breaks/exams, " +
+      "tasks and deadlines with study blocks (and the autonomy setting: suggest, plan or autopilot), " +
       "training plan and log, meal plan and saved meals, reminders, shopping list, what he's reading/watching/listening to, " +
       "games played, feedback on suggestions, the free rules-based suggestions already on Today, and your memory " +
       "(profile, his new notes, what you've learned). Call this first.",
@@ -59,14 +64,17 @@ export const TOOLS: Tool[] = [
     }),
     annotations: read,
     run: async (args, rpc) => {
-      const ctx = (await rpc("agent_context", { days_back: args.days_back ?? 7, days_ahead: args.days_ahead ?? 7 })) as AgentContext;
+      const [ctx, plans] = await Promise.all([
+        rpc("agent_context", { days_back: args.days_back ?? 7, days_ahead: args.days_ahead ?? 7 }) as Promise<AgentContext>,
+        rpc("agent_plan_context", { days_ahead: Math.max(14, Number(args.days_ahead ?? 7)) }) as Promise<Record<string, unknown>>,
+      ]);
       let rules: { title: string; detail: string }[] = [];
       try {
         rules = ruleSuggestions(ctx);
       } catch {
         // The rules are a nice-to-have here; the context still stands.
       }
-      return { ...ctx, free_suggestions_on_today: rules };
+      return { ...ctx, ...plans, free_suggestions_on_today: rules };
     },
   },
   {
@@ -171,7 +179,9 @@ export const TOOLS: Tool[] = [
   {
     name: "add_event",
     title: "Add to timetable",
-    description: "Chat only, when the owner asks you himself: add an event to his timetable now. Scheduled runs use add_suggestions instead.",
+    description:
+      "Glactivity is the owner's main calendar: when he asks to add something to his calendar, timetable or diary, use this, " +
+      "not another calendar, unless he names a different one. Chat only (he is asking you himself); scheduled runs use add_suggestions instead.",
     inputSchema: object(
       {
         title: { type: "string", maxLength: 200 },
@@ -214,6 +224,131 @@ export const TOOLS: Tool[] = [
         due_on: args.due_on,
         recurrence: args.recurrence ?? "none",
         notify_days_before: args.notify_days_before ?? 3,
+      }),
+  },
+  {
+    name: "find_free_time",
+    title: "Find free time",
+    description:
+      "Free stretches for study over the next days (UK time), clear of lectures and other events, training, meals (12:30–13:30, 19:00–20:00) " +
+      "and blocks already placed, inside the study day (weekdays 08:30–21:30, weekends 10:00–18:00). Also gives room_minutes: how much more " +
+      "study fits comfortably that day (about 5 h on weekdays, 3 h at weekends, minus what's planned). Respect the owner's own preferences from memory over these defaults.",
+    inputSchema: object({ days: { type: "integer", minimum: 1, maximum: 14, default: 7 } }),
+    annotations: read,
+    run: async (args, rpc) => {
+      const days = Math.min(Math.max(Number(args.days ?? 7), 1), 14);
+      const [ctx, plans] = await Promise.all([
+        rpc("agent_context", { days_back: 0, days_ahead: days }) as Promise<AgentContext>,
+        rpc("agent_plan_context", { days_ahead: days }) as Promise<{ blocks: { starts_at: string; ends_at: string; status: string }[] }>,
+      ]);
+      return {
+        time_zone: ctx.timezone,
+        days: freeTime({
+          days: Array.from({ length: days }, (_, i) => addDays(ctx.today, i)),
+          timeZone: ctx.timezone || "Europe/London",
+          now: new Date(ctx.now),
+          events: ctx.events,
+          blocks: plans.blocks,
+          training: ctx.training_plan,
+        }),
+      };
+    },
+  },
+  {
+    name: "plan_blocks",
+    title: "Place study blocks",
+    description:
+      "Put study blocks for open tasks into free time (use find_free_time first). Follows the owner's autonomy setting automatically: " +
+      "suggest → they become suggestions on Today; plan (default) → pencilled in as tentative blocks he can keep, move or skip; " +
+      "autopilot → booked. Blocks of 30 min–2 h with breaks between, finished comfortably before the deadline, harder work in his best focus times. " +
+      "Refuses clashes and explains them, so you can adjust.",
+    inputSchema: object(
+      {
+        blocks: {
+          type: "array",
+          minItems: 1,
+          maxItems: 12,
+          items: object(
+            { task_id: { type: "string", format: "uuid" }, starts_at: TIME, ends_at: TIME, note: { type: "string", maxLength: 300 } },
+            ["task_id", "starts_at", "ends_at"],
+          ),
+        },
+      },
+      ["blocks"],
+    ),
+    annotations: write,
+    run: (args, rpc) => rpc("agent_plan_blocks", { blocks: args.blocks }),
+  },
+  {
+    name: "withdraw_blocks",
+    title: "Take back study blocks",
+    description:
+      "To re-plan: take back future blocks you placed that are still tentative (or, on autopilot, that you booked). Blocks the owner kept or added himself are never changed.",
+    inputSchema: object({ ids: { type: "array", minItems: 1, items: { type: "string", format: "uuid" } } }, ["ids"]),
+    annotations: overwrite,
+    run: (args, rpc) => rpc("agent_withdraw_blocks", { block_ids: args.ids }),
+  },
+  {
+    name: "add_task",
+    title: "Add a task",
+    description:
+      "Add a task or deadline (coursework, applications, admin) with an estimate of the hours it really takes. Use it when the owner asks in a chat, " +
+      "or in a check only when autonomy is autopilot; otherwise propose it with add_suggestions (change type add_task).",
+    inputSchema: object(
+      {
+        title: { type: "string", maxLength: 200 },
+        due_on: DAY,
+        due_time: { type: "string", pattern: "^\\d{2}:\\d{2}$", description: "HH:MM, UK time" },
+        estimate_minutes: { type: "integer", minimum: 0, maximum: 6000 },
+        priority: { type: "integer", minimum: 1, maximum: 3, default: 2, description: "1 high, 2 normal, 3 low" },
+        subject: { type: "string", maxLength: 80, description: "Module or subject" },
+        notes: { type: "string", maxLength: 2000 },
+      },
+      ["title"],
+    ),
+    annotations: write,
+    run: (args, rpc) =>
+      rpc("agent_add_task", {
+        title: args.title,
+        due_on: args.due_on ?? null,
+        due_time: args.due_time ?? null,
+        estimate_minutes: args.estimate_minutes ?? null,
+        priority: args.priority ?? 2,
+        subject: args.subject ?? null,
+        notes: args.notes ?? null,
+      }),
+  },
+  {
+    name: "update_task",
+    title: "Update a task",
+    description:
+      "Change a task when the owner asks (new deadline, estimate, priority), or mark it done or dropped (which takes back its future blocks). Only the fields given change.",
+    inputSchema: object(
+      {
+        id: { type: "string", format: "uuid" },
+        title: { type: "string", maxLength: 200 },
+        due_on: DAY,
+        due_time: { type: "string", pattern: "^\\d{2}:\\d{2}$" },
+        estimate_minutes: { type: "integer", minimum: 0, maximum: 6000 },
+        priority: { type: "integer", minimum: 1, maximum: 3 },
+        subject: { type: "string", maxLength: 80 },
+        notes: { type: "string", maxLength: 2000 },
+        status: { type: "string", enum: ["open", "done", "dropped"] },
+      },
+      ["id"],
+    ),
+    annotations: overwrite,
+    run: (args, rpc) =>
+      rpc("agent_update_task", {
+        task_id: args.id,
+        title: args.title ?? null,
+        due_on: args.due_on ?? null,
+        due_time: args.due_time ?? null,
+        estimate_minutes: args.estimate_minutes ?? null,
+        priority: args.priority ?? null,
+        subject: args.subject ?? null,
+        notes: args.notes ?? null,
+        status: args.status ?? null,
       }),
   },
   {

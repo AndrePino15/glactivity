@@ -23,6 +23,8 @@ import type {
   Period,
   Profile,
   Reminder,
+  Task,
+  WorkBlock,
   WorkoutLog,
   WorkoutPlanDay,
 } from "./types";
@@ -159,6 +161,31 @@ export function useSuggestionFeedback(day: ISODate | null) {
   );
 }
 
+/** Open tasks, and ones closed in the last fortnight. */
+export function useTasks() {
+  return useDb<Task[]>(
+    "tasks",
+    (db) => db.from("tasks").select("*").order("due_on", { ascending: true, nullsFirst: false }).order("priority"),
+    [],
+  );
+}
+
+/** Kept and pencilled-in study blocks overlapping the local days [from, to]. */
+export function useWorkBlocks(from: ISODate | null, to: ISODate | null) {
+  return useDb<WorkBlock[]>(
+    from && to ? `work-blocks:${from}:${to}` : null,
+    (db) =>
+      db
+        .from("work_blocks")
+        .select("*")
+        .in("status", ["tentative", "planned"])
+        .lt("starts_at", fromISODate(addDays(to!, 1)).toISOString())
+        .gt("ends_at", fromISODate(from!).toISOString())
+        .order("starts_at"),
+    [],
+  );
+}
+
 /** The assistant's briefs for a day (morning and/or evening). */
 export function useAgentBriefs(day: ISODate | null) {
   return useDb<AgentBrief[]>(
@@ -168,11 +195,19 @@ export function useAgentBriefs(day: ISODate | null) {
   );
 }
 
-/** The assistant's open suggestions for a day. */
+/** The assistant's open suggestions from this day to a week ahead (an evening check plans tomorrow). */
 export function useAgentSuggestions(day: ISODate | null) {
   return useDb<AgentSuggestion[]>(
     day ? `agent-suggestions:${day}` : null,
-    (db) => db.from("agent_suggestions").select("*").eq("day", day!).eq("status", "open").order("created_at"),
+    (db) =>
+      db
+        .from("agent_suggestions")
+        .select("*")
+        .gte("day", day!)
+        .lte("day", addDays(day!, 7))
+        .eq("status", "open")
+        .order("day")
+        .order("created_at"),
     [],
   );
 }

@@ -1,0 +1,131 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.when {
+  font: var(--text-headline);
+}
+
+.times {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.textActions {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.start {
+  align-self: flex-start;
+}
+
+.quiet {
+  color: var(--text-secondary);
+}
+
+.danger {
+  align-self: flex-start;
+  color: var(--cat-exam);
+}
+
+.error {
+  color: var(--cat-exam);
+  font: var(--text-footnote);
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: 400 16px/22px var(--font);
+  resize: vertical;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: var(--text-secondary);
+}
+
+.study {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 0.5px solid var(--separator);
+}
+
+.study h3 {
+  font: var(--text-headline);
+}
+
+/* Tasks page */
+
+.add {
+  margin-bottom: var(--space-6);
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0.5px solid var(--separator);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: 400 16px/21px var(--font);
+  outline: none;
+  transition: border-color 0.15s var(--ease);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input:focus {
+  border-color: var(--text-secondary);
+}
+
+.hint {
+  margin-top: var(--space-2);
+  color: var(--text-tertiary);
+  font: var(--text-footnote);
+}
+
+/* A thin bar for how much of the estimate is done. */
+.progress {
+  display: block;
+  width: 100%;
+  height: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--fill-strong);
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--cat-study);
+}
+
+.high {
+  color: var(--cat-exam);
+}
+
+@media (hover: hover) {
+  .input:hover:not(:focus) {
+    border-color: var(--fill-strong);
+  }
+}

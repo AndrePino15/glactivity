@@ -33,9 +33,19 @@ export function DayAgenda({
       {events.map((e) => (
         <Row
           key={e.id}
-          leading={<Time category={e.category}>{e.all_day ? "All day" : formatTime(e.starts_at)}</Time>}
+          leading={
+            <Time category={e.block ? "study" : e.category} tentative={e.block?.status === "tentative"}>
+              {e.all_day ? "All day" : formatTime(e.starts_at)}
+            </Time>
+          }
           title={e.title}
-          detail={[e.all_day ? null : `until ${formatTime(e.ends_at)}`, e.location].filter(Boolean).join(" · ")}
+          detail={[
+            e.block?.status === "tentative" ? "Pencilled in" : e.block ? "Study" : null,
+            e.all_day ? null : `until ${formatTime(e.ends_at)}`,
+            e.location,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
           onClick={onSelect ? () => onSelect(e) : undefined}
         />
       ))}
@@ -43,9 +53,13 @@ export function DayAgenda({
   );
 }
 
-function Time({ category, children }: { category: string; children: string }) {
+function Time({ category, tentative, children }: { category: string; tentative?: boolean; children: string }) {
   return (
-    <span className={styles.time} style={{ "--cat": `var(--cat-${category})` } as CSSProperties}>
+    <span
+      className={styles.time}
+      data-tentative={tentative || undefined}
+      style={{ "--cat": `var(--cat-${category})` } as CSSProperties}
+    >
       {children}
     </span>
   );

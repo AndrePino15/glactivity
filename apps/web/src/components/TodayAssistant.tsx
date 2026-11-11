@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Section, TextButton } from "@/components/ui";
 import { acceptLabel, acceptSuggestion, dismissSuggestion, tellAssistant } from "@/lib/assistant/actions";
-import { formatTime, type ISODate } from "@/lib/dates";
+import { addDays, formatShortDay, formatTime, type ISODate } from "@/lib/dates";
 import { useAgentBriefs, useAgentSuggestions } from "@/lib/db/hooks";
 import type { AgentSuggestion } from "@/lib/db/types";
 import styles from "./TodayAssistant.module.css";
@@ -15,7 +15,8 @@ import styles from "./TodayAssistant.module.css";
 export function TodayAssistant({ today }: { today: ISODate }) {
   const briefs = useAgentBriefs(today);
   const suggestions = useAgentSuggestions(today);
-  const brief = briefs.data.find((b) => b.slot === "evening") ?? briefs.data.find((b) => b.slot === "morning");
+  // The latest brief written today.
+  const brief = [...briefs.data].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
 
   return (
     <Section title="Assistant">
@@ -30,7 +31,7 @@ export function TodayAssistant({ today }: { today: ISODate }) {
       {suggestions.data.length > 0 && (
         <ul className={styles.ideas}>
           {suggestions.data.map((s) => (
-            <Idea key={s.id} suggestion={s} onAnswered={() => suggestions.mutate()} />
+            <Idea key={s.id} suggestion={s} today={today} onAnswered={() => suggestions.mutate()} />
           ))}
         </ul>
       )}
@@ -39,7 +40,7 @@ export function TodayAssistant({ today }: { today: ISODate }) {
   );
 }
 
-function Idea({ suggestion, onAnswered }: { suggestion: AgentSuggestion; onAnswered: () => void }) {
+function Idea({ suggestion, today, onAnswered }: { suggestion: AgentSuggestion; today: ISODate; onAnswered: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,6 +58,9 @@ function Idea({ suggestion, onAnswered }: { suggestion: AgentSuggestion; onAnswe
 
   return (
     <li className={styles.idea}>
+      {suggestion.day !== today && (
+        <p className={styles.meta}>{suggestion.day === addDays(today, 1) ? "Tomorrow" : formatShortDay(suggestion.day)}</p>
+      )}
       <p className={styles.title}>{suggestion.title}</p>
       {suggestion.detail && <p className={styles.detail}>{suggestion.detail}</p>}
       <div className={styles.actions}>

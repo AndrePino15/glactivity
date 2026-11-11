@@ -9,6 +9,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Pencilled in by the assistant: not settled yet. */
+.time[data-tentative] {
+  border-left-style: dashed;
+  color: var(--text-secondary);
+}
+
 .form {
   display: flex;
   flex-direction: column;

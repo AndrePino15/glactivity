@@ -38,6 +38,7 @@
   --cat-social: light-dark(#a8648c, #d49cbd);
   --cat-personal: light-dark(#7f6aa8, #b4a5d6);
   --cat-other: light-dark(#8d877d, #8a91ab);
+  --cat-study: light-dark(#4f8a8b, #8cc5c6);
   --cat-holiday: light-dark(#a3896b, #c9b08f);
 
   --star: light-dark(transparent, rgb(255 246 224 / 0.55));

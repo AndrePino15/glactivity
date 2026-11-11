@@ -14,7 +14,11 @@ export type Profile = {
   timezone: string;
   current_country: Country;
   shopping_day: number;
+  autonomy?: Autonomy;
 };
+
+/** How much the assistant may do on its own. */
+export type Autonomy = "suggest" | "plan" | "autopilot";
 
 export type CalendarSource = {
   id: string;
@@ -40,6 +44,8 @@ export type CalendarEvent = {
   ends_at: string;
   all_day: boolean;
   category: EventCategory;
+  /** Set when this row is a study block shown alongside events. */
+  block?: WorkBlock & { task: Task | null };
 };
 
 export type Period = {
@@ -160,7 +166,9 @@ export type AgentChange =
   | { type: "add_shopping_items"; items: string[] }
   | { type: "set_meal"; day: string; slot: MealSlot; title: string }
   | { type: "add_reminder"; title: string; due_on: string; recurrence?: Recurrence }
-  | { type: "add_list_item"; list: ListKind; title: string; subtitle?: string };
+  | { type: "add_list_item"; list: ListKind; title: string; subtitle?: string }
+  | { type: "add_task"; title: string; due_on?: string; estimate_minutes?: number }
+  | { type: "add_work_block"; task_id: string; starts_at: string; ends_at: string };
 
 export type AgentSuggestion = {
   id: string;
@@ -173,3 +181,28 @@ export type AgentSuggestion = {
 };
 
 export type AgentActivity = { id: string; at: string; actor: "claude" | "you"; summary: string };
+
+export type Task = {
+  id: string;
+  title: string;
+  notes: string | null;
+  subject: string | null;
+  due_on: string | null;
+  due_time: string | null;
+  estimate_minutes: number | null;
+  priority: 1 | 2 | 3;
+  status: "open" | "done" | "dropped";
+  source: "app" | "claude";
+  created_at: string;
+  completed_at: string | null;
+};
+
+export type WorkBlock = {
+  id: string;
+  task_id: string;
+  starts_at: string;
+  ends_at: string;
+  status: "tentative" | "planned" | "skipped" | "withdrawn";
+  source: "app" | "claude";
+  note: string | null;
+};

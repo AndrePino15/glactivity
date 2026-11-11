@@ -84,6 +84,13 @@ Build this in stages, each verified and shipped before the next: (a) connector +
 - App: the Assistant section on Today (brief, ideas with Accept / Not now, "Tell your assistant"), an Assistant box in Lists, and Settings → Assistant (connector link, profile, learned notes, your notes, activity).
 - Browser check: `tools/e2e/walk-assistant.mjs`.
 
+**Stage (b): done.** Agreed details: tasks get their own tab in place of Fun (the album's "Pick another" moved onto Today; previous weeks onto Lists → Listen); Autopilot books study blocks and adds tasks only, while anything with other people, meals or shopping stays a suggestion; study-day defaults below, changed by telling the assistant.
+- Database: `backend/supabase/migrations/20261113000000_tasks.sql` (`tasks`, `work_blocks` with tentative / planned / skipped / withdrawn, `profiles.autonomy` defaulting to plan, `add_task` and `add_work_block` suggestion changes; `agent_plan_context`, `agent_add_task`, `agent_update_task`, `agent_plan_blocks` which follows the autonomy setting and refuses clashes, `agent_withdraw_blocks` limited to the assistant's own blocks). Tests: `backend/tests/tasks.test.ts`.
+- Planner: `apps/web/src/lib/assistant/freetime.ts` finds free stretches (weekdays 08:30–21:30, weekends 10:00–18:00; meals 12:30–13:30 and 19:00–20:00 kept free; 10-minute buffers; planned training; about 5 h of study a weekday, 3 h at weekends). Claude chooses blocks from these (connector tools `find_free_time`, `plan_blocks`, `withdraw_blocks`, `add_task`, `update_task`); the check now plans study before writing the brief.
+- App: Tasks tab (quick add like "Essay 5h due Fri !", grouped by when due, progress bar, edit sheet with study time); study blocks on Today and in the Timetable (dashed edge when pencilled in; Keep / Move / Skip); "Due soon" on Today; Settings → Assistant → How much it does (Suggest / Plan / Autopilot).
+- Fixes: Glactivity is named as the main calendar in the connector; the evening brief is saved for the day it's written; ideas for the coming days show on Today with their day.
+- Browser check: `tools/e2e/walk-tasks.mjs`.
+
 **Adding the connector:** Settings → Assistant → Copy link, then at claude.ai/customize/connectors → Add custom connector, name "Glactivity", paste the link, no sign-in. Try it in a chat: "What's my week like?" or "Do my Glactivity morning check".
 
 ## Constraints

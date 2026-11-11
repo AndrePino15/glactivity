@@ -33,6 +33,10 @@ export function acceptLabel(change: AgentChange | null): string {
       return `Plan ${change.slot}`;
     case "add_reminder":
       return "Add reminder";
+    case "add_task":
+      return "Add task";
+    case "add_work_block":
+      return "Book it";
     case "add_list_item":
       return { shopping: "Add to shopping", movies: "Add to Watch", books: "Add to Read", albums: "Add to Listen" }[change.list];
     default:

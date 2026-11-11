@@ -4,8 +4,10 @@ import { DayAgenda } from "@/components/calendar/DayAgenda";
 import { DailyGames } from "@/components/fun/DailyGames";
 import { TodayMeals } from "@/components/lifestyle/TodayMeals";
 import { TodayAssistant } from "@/components/TodayAssistant";
+import { BlockSheet } from "@/components/tasks/BlockSheet";
 import { TodaySuggestions } from "@/components/TodaySuggestions";
 import { TodayWorkout } from "@/components/lifestyle/TodayWorkout";
+import { useState } from "react";
 import { Button, Check, List, Note, Row, Section, TextButton } from "@/components/ui";
 import { TodayMedia } from "./TodayMedia";
 import { breakToAskAbout } from "@/lib/calendar/breaks";
@@ -21,9 +23,12 @@ import {
   useProfile,
   useReminders,
   useSources,
+  useTasks,
   useToday,
+  useWorkBlocks,
 } from "@/lib/db/hooks";
-import type { Country, Period, Reminder } from "@/lib/db/types";
+import type { CalendarEvent, Country, Period, Reminder } from "@/lib/db/types";
+import { dueSoon, withBlocks } from "@/lib/tasks";
 import { modeOn } from "@/lib/modes";
 import { upcomingReminders } from "@/lib/reminders";
 import styles from "./today.module.css";
@@ -39,17 +44,22 @@ export function TodayContent() {
   const { data: sources, loaded: sourcesLoaded } = useSources();
   const reminders = useReminders();
   const shopping = useList("shopping");
+  const tasks = useTasks();
+  const blocks = useWorkBlocks(today, today);
+  const [block, setBlock] = useState<CalendarEvent["block"] | null>(null);
 
   if (!today) return null;
   const home = profile?.current_country ?? "GB";
   const askAbout = breakToAskAbout(periods, today);
   const onBreak = breakOn(today, periods);
-  const due = upcomingReminders(reminders.data, today, 30).filter(
+  const reminding = upcomingReminders(reminders.data, today, 30).filter(
     (r) => r.days <= r.reminder.notify_days_before,
   );
   const toBuy = shopping.data.filter((i) => i.status === "open");
   const shoppingDay = profile ? daysUntilWeekday(today, profile.shopping_day) : null;
   const todaysEvents = eventsOn(today, events);
+  const schedule = withBlocks(todaysEvents, blocks.data, tasks.data);
+  const due = dueSoon(tasks.data, today);
   const mode = modeOn(today, events, periods, home);
 
   async function answerBreak(period: Period, country: Country) {
@@ -104,11 +114,28 @@ export function TodayContent() {
       <Section title="Schedule">
         {onBreak?.confirmed && onBreak.country === "PT" && <p className={styles.context}>On break · in Portugal</p>}
         <DayAgenda
-          events={todaysEvents}
+          events={schedule}
+          onSelect={(e) => e.block && setBlock(e.block)}
           holidays={holidaysOn(today, holidays, periods, home)}
           empty={sourcesLoaded && sources.length === 0 ? "Add your timetable link in Settings to see lectures here." : "Nothing scheduled today."}
         />
       </Section>
+
+      {due.length > 0 && (
+        <Section title="Due soon">
+          <List>
+            {due.map((task) => (
+              <Row
+                key={task.id}
+                title={task.title}
+                detail={task.subject ?? undefined}
+                trailing={task.due_on! < today ? "overdue" : relativeDay(today, task.due_on!)}
+                href="/tasks"
+              />
+            ))}
+          </List>
+        </Section>
+      )}
 
       <TodayAssistant today={today} />
 
@@ -119,11 +146,11 @@ export function TodayContent() {
       <TodayMeals today={today} />
 
       <Section title="Reminders">
-        {due.length === 0 ? (
+        {reminding.length === 0 ? (
           <Note>No reminders for today.</Note>
         ) : (
           <List>
-            {due.map(({ reminder, due: on, days }) => (
+            {reminding.map(({ reminder, due: on, days }) => (
               <Row
                 key={reminder.id}
                 control={<Check checked={false} onToggle={() => markDone(reminder, on)} label={`Done: ${reminder.title}`} />}
@@ -153,6 +180,8 @@ export function TodayContent() {
       <TodayMedia today={today} />
 
       <DailyGames today={today} layout="grid" />
+
+      <BlockSheet block={block ?? null} onClose={() => setBlock(null)} />
     </>
   );
 }

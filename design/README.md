@@ -10,7 +10,7 @@ A painted red squirrel, from `mascot/squirrel-sheet.webp`. `mascot/cut_poses.py`
 | `running` | Timetable |
 | `stashing` (arms full of acorns) | Lists |
 | `snacking` (eating an acorn) | Lifestyle |
-| `celebrating` (falling leaves) | Fun |
+| `celebrating` (falling leaves) | Tasks, when everything's done |
 | `lounging` (on a branch) | Bottom of Today |
 
 `mascot/app-icon.png` (1024px, standing squirrel on cream) is the source for the PNG icons in `apps/web/public/icons/` and `apps/web/src/app/{icon,apple-icon}.png`.
@@ -27,7 +27,7 @@ Defined once in `apps/web/src/app/globals.css` with `light-dark()`, so every col
 | `--text-secondary` | `#6B665E` | `#9AA1BD` |
 | `--accent` (buttons, selected states) | `#1D1B18` ink | `#F2EAD9` cream |
 
-There is no brand colour: the squirrel is the only colour on the page. Event categories have their own quiet colours, used only as the thin edge next to an event's time (`--cat-lecture`, `--cat-exam`, `--cat-gym`, `--cat-meal`, `--cat-social`, `--cat-personal`).
+There is no brand colour: the squirrel is the only colour on the page. Event categories have their own quiet colours, used only as the thin edge next to an event's time (`--cat-lecture`, `--cat-exam`, `--cat-gym`, `--cat-meal`, `--cat-social`, `--cat-personal`), plus `--cat-study` for study blocks (a dashed edge while the assistant has only pencilled one in).
 
 Type follows Apple's text styles (`--text-large-title` 34pt down to `--text-caption` 12pt) using the system font, which is SF Pro on iPhone and Mac.
 
