@@ -1,0 +1,45 @@
+import { createRequire } from "module";
+const require = createRequire("/opt/node22/lib/node_modules/");
+const { chromium } = require("playwright");
+const BASE = "http://localhost:3102", OUT = process.argv[2];
+const browser = await chromium.launch();
+const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage();
+const problems = [];
+page.on("pageerror", (e) => problems.push("pageerror: " + e.message));
+page.on("response", (r) => { if (r.status() >= 400 && !/\/api\/(holidays|search)/.test(r.url())) problems.push(`${r.status()} ${r.url()}`); });
+const log = [];
+const step = async (name, fn) => { try { const x = await fn(); log.push("ok   " + name + (x ? "  — " + x : "")); } catch (e) { log.push("FAIL " + name + " — " + e.message.split("\n")[0]); await page.screenshot({ path: `${OUT}/fail-${name.replace(/\W+/g, "-")}.png` }); } };
+await step("sign in + calendar", async () => {
+  await page.goto(BASE + "/");
+  await page.fill('input[type="email"]', "andre@example.com");
+  await page.fill('input[type="password"]', "correct horse");
+  await page.click('button:has-text("Sign in")');
+  await page.waitForURL(BASE + "/");
+  await page.goto(BASE + "/settings");
+  await page.click("text=Add calendar link");
+  await page.fill('input[type="url"]', "http://localhost:54400/feed.ics");
+  await page.click('dialog button[type="submit"]');
+  await page.waitForSelector("text=Updated just now", { timeout: 15000 });
+});
+await step("for today shows", async () => {
+  await page.goto(BASE + "/");
+  await page.waitForSelector("text=For today", { timeout: 8000 });
+  const titles = await page.locator("section:has(h2:has-text('For today')) li").allTextContents();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `${OUT}/01-today.png`, fullPage: true });
+  return titles.map((t) => t.slice(0, 40)).join(" | ");
+});
+await step("dismiss sticks after reload", async () => {
+  const first = page.locator("section:has(h2:has-text('For today')) li").first();
+  const title = (await first.locator("button[aria-label^='Not today']").getAttribute("aria-label")).replace("Not today: ", "");
+  await first.locator("button[aria-label^='Not today']").click();
+  await page.waitForTimeout(800);
+  await page.reload();
+  await page.waitForSelector("text=Schedule");
+  await page.waitForTimeout(1200);
+  const still = await page.locator(`text=${title}`).count();
+  if (still) throw new Error(`"${title}" came back`);
+  return `dismissed "${title}"`;
+});
+await browser.close();
+console.log(log.join("\n") + "\n--- problems:\n" + [...new Set(problems)].join("\n"));
