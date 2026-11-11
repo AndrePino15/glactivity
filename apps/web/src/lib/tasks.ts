@@ -1,50 +1,11 @@
 import { daysBetween, formatShortDay, toISODate, type ISODate } from "./dates";
 import type { CalendarEvent, Task, WorkBlock } from "./db/types";
-import { parseQuickReminder } from "./quick-reminder";
 
-export type QuickTask = { title: string; due_on: ISODate | null; estimate_minutes: number | null; priority: 1 | 2 | 3 };
-
-/**
- * Reads a one-line task like "Essay 5h due Fri", "Lab report 90m by 3 Dec !"
- * or "Read chapter 4 tomorrow". Without a date there's no deadline.
- */
-export function parseQuickTask(input: string, today: ISODate): QuickTask {
-  let text = ` ${input.trim()} `;
-  let estimate: number | null = null;
-  let priority: 1 | 2 | 3 = 2;
-
-  const hours = text.match(/\s(\d+(?:[.,]\d+)?)\s?(?:h|hrs?|hours?)(?=\s|$|[,.;])/i);
-  const minutes = text.match(/\s(\d+)\s?(?:m|mins?|minutes)(?=\s|$|[,.;])/i);
-  if (hours) {
-    estimate = Math.round(Number(hours[1].replace(",", ".")) * 60);
-    text = text.replace(hours[0], " ");
-  } else if (minutes) {
-    estimate = Number(minutes[1]);
-    text = text.replace(minutes[0], " ");
-  }
-  const urgent = text.match(/\s(!+|urgent|important)(?=\s|$)/i);
-  if (urgent) {
-    priority = 1;
-    text = text.replace(urgent[0], " ");
-  }
-
-  const cleaned = text.replace(/\s{2,}/g, " ").trim();
-  const parsed = parseQuickReminder(cleaned, today);
-  // The reminder reader drops the date words it understood; same title back means no date.
-  const hasDate = parsed.title !== cleaned.replace(/[,;]$/, "");
-  return {
-    title: (hasDate ? parsed.title : cleaned).replace(/\s+(?:due|by|for|on)$/i, "") || input.trim(),
-    due_on: hasDate ? parsed.due_on : null,
-    estimate_minutes: estimate,
-    priority,
-  };
-}
-
-/** "5 h", "1.5 h", "45 min" */
+/** "5 h", "1.5 h", "45 min" (with a non-breaking space, so the number and unit stay together) */
 export function formatMinutes(minutes: number): string {
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return `${minutes}\u00a0min`;
   const h = Math.round((minutes / 60) * 2) / 2;
-  return `${h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)} h`;
+  return `${h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)}\u00a0h`;
 }
 
 const blockMinutes = (b: WorkBlock) => Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000);

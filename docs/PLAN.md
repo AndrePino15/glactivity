@@ -70,7 +70,7 @@ Big features are developed on a branch and merged to `main` at each milestone.
   - [x] Rules-based suggestions on Today ("For today"): revision time before exams, plan meals before shopping, free evenings, long gaps between lectures, a nudge after quiet days, empty weekends. Each can be acted on or dismissed for the day. Free, no AI.
   - [ ] Claude assistant on the owner's subscription (no API credit). Agreed design and progress: [`docs/claude-agent.md`](claude-agent.md).
     - [x] (a) Glactivity connector for Claude (secret link from Settings → Assistant), memory (your notes, what it learned, a short profile), a brief and accept/dismiss ideas on Today, "Tell your assistant", and an activity log
-    - [x] (b) Tasks tab (in place of Fun) with deadlines, estimates and progress; the planner pencils study blocks into free time (keep, move or skip them on Today and in the Timetable); Suggest / Plan / Autopilot setting
+    - [x] (b) Tasks tab (in place of Fun): describe a task in your own words and the assistant sets it up, with deadlines, estimates and progress; the planner pencils study blocks into free time (keep, move or skip them on Today and in the Timetable); Suggest / Plan / Autopilot setting
     - [ ] (c) Goals, milestones, the Goals section, goal planning and the weekly review
     - [ ] (d) Learning how long things take
     - [ ] (e) Scheduled task (07:00 and 18:00) and "Run now"
