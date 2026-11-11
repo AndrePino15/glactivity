@@ -52,9 +52,25 @@ The owner wants a **personal assistant** that manages his time, not only suggest
     - **Weekly review** (Sunday evening run): progress per goal, what's slipping, and a short "this week for your goals" plan, balanced against deadlines and exams so goals never crowd out coursework near exams.
     - Dates that come from the outside world (application deadlines, internship windows) must be **checked against official sources** where the run can search the web, shown with their source, and marked "to confirm" until the owner confirms. Never present a guessed deadline as fact.
     - In the app: a **Goals** view (each goal with its milestones and what's next), and on Today a quiet line for the next goal step when one is planned. Goals can be added from the app, from any chat ("add a goal: apply to Imperial for an MSc"), or suggested by the agent from context, as a suggestion the owner accepts.
-14. **Budget**: no Anthropic API. Everything runs on the owner's subscription. Only if "Run now" cannot trigger the scheduled task, a tiny API budget (owner's cap: £5/month) may be proposed for that one feature, with his approval.
+14. **Goals section in the app** (its own page, reachable from Today and the Lists hub; whether it also gets a tab is a design decision to agree with the owner):
+    - Each goal: title, why, target date, status, and a **progress bar** (done work weighted by estimated hours, not just a count of ticks), plus hours spent vs planned.
+    - Milestones listed in order, each with its own progress bar, target date and "on track / at risk / late" state.
+    - **What's next**: the next one or two concrete steps, and when they're planned.
+    - A timeline of milestones up to the target date, and the notes/sources attached to the goal (e.g. the official page an application deadline came from).
+    - Same design rules as the rest of the app: clean, no decoration for its own sake.
+15. **A dedicated pipeline for planning big goals**, so the assistant takes its time and does it well. The connector ships it as an MCP **prompt** (e.g. `plan_a_goal`), plus a tool description that points to it, so any Claude chat follows the same steps:
+    1. **Understand**: ask what the goal really is, why, the deadline, constraints (money, location, time per week), and what's already done. Ask, don't assume.
+    2. **Research**: where web search is available, check requirements and outside dates against official sources; record each with its link; mark anything unverified "to confirm".
+    3. **Shape**: 3–7 milestones, each concrete and checkable, in order, with dependencies.
+    4. **Estimate**: hours per task, using the owner's profile (how long things really take him) and adding buffer.
+    5. **Schedule backwards** from the deadline, then check real capacity against coursework, exams and other goals; if it doesn't fit, say so and offer options (start earlier, cut scope, move the date) rather than overpacking.
+    6. **Show the plan** to the owner and adjust it with him.
+    7. **Save it** only once he agrees, in one call (below), then let the planner place the first steps.
+    The same pipeline runs a lighter **re-plan** when a goal slips (from the weekly review or on request).
+16. **Saving a whole plan from any chat**: a connector tool such as `save_goal_plan(goal, milestones[{title, target_date, tasks[{title, estimate_hours, due?}]}], sources[], notes)` creates or updates the goal and everything under it in one go. This is how the chat where the owner works on a project (e.g. his Imperial application chat) hands its plan to Glactivity. Plus smaller tools: `add_goal`, `update_goal`, `add_milestone`, `add_goal_note`, `log_progress`. These are the owner's own requests, so they write directly (no accept step), and every change shows in the activity log.
+17. **Budget**: no Anthropic API. Everything runs on the owner's subscription. Only if "Run now" cannot trigger the scheduled task, a tiny API budget (owner's cap: £5/month) may be proposed for that one feature, with his approval.
 
-Build this in stages, each verified and shipped before the next: (a) connector + memory + inbox + activity log; (b) tasks, planner, autonomy; (c) goals, milestones and the weekly review; (d) duration learning and profile; (e) scheduled task + "Run now".
+Build this in stages, each verified and shipped before the next: (a) connector + memory + inbox + activity log; (b) tasks, planner, autonomy; (c) goals, milestones, the Goals section with progress, the goal-planning pipeline and `save_goal_plan`, and the weekly review; (d) duration learning and profile; (e) scheduled task + "Run now".
 
 ## Constraints
 
