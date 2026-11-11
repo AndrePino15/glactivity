@@ -98,3 +98,21 @@ describe("notifications", () => {
     expect(after.rows[0]).toEqual({ d: "2026-11-05" });
   });
 });
+
+describe("phase 3", () => {
+  it("keeps suggestion feedback private", async () => {
+    await asUser(db, ALICE, () =>
+      db.query("insert into public.suggestion_feedback (day, key, response) values ('2026-11-10', 'gap', 'done')"),
+    );
+    expect(await asUser(db, BOB, () => db.query("select * from public.suggestion_feedback")).then((r) => r.rows)).toEqual([]);
+  });
+
+  it("records suggestion feedback once per suggestion per day", async () => {
+    await asUser(db, ALICE, async () => {
+      await db.query("insert into public.suggestion_feedback (day, key, response) values ('2026-11-11', 'social', 'dismissed')");
+      await expect(
+        db.query("insert into public.suggestion_feedback (day, key, response) values ('2026-11-11', 'social', 'maybe')"),
+      ).rejects.toThrow(/check constraint|duplicate key/);
+    });
+  });
+});

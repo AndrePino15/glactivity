@@ -146,6 +146,15 @@ export function useMealPlan(from: ISODate | null, to: ISODate | null) {
   );
 }
 
+/** Suggestions already done or dismissed on a day. */
+export function useSuggestionFeedback(day: ISODate | null) {
+  return useDb<{ key: string; response: "done" | "dismissed" }[]>(
+    day ? `suggestion-feedback:${day}` : null,
+    (db) => db.from("suggestion_feedback").select("key, response").eq("day", day!),
+    [],
+  );
+}
+
 const SYNC_EVERY_MS = 3 * 60 * 60 * 1000;
 // A feed that keeps failing stays "stale"; don't retry it on every render.
 const RETRY_AFTER_MS = 10 * 60 * 1000;

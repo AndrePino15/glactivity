@@ -3,6 +3,7 @@
 import { DayAgenda } from "@/components/calendar/DayAgenda";
 import { DailyGames } from "@/components/fun/DailyGames";
 import { TodayMeals } from "@/components/lifestyle/TodayMeals";
+import { TodaySuggestions } from "@/components/TodaySuggestions";
 import { TodayWorkout } from "@/components/lifestyle/TodayWorkout";
 import { Button, Check, List, Note, Row, Section, TextButton } from "@/components/ui";
 import { TodayMedia } from "./TodayMedia";
@@ -31,8 +32,8 @@ export function TodayContent() {
   const today = useToday();
   const { data: profile } = useProfile();
   const { data: periods, mutate: mutatePeriods } = usePeriods();
-  // A week ahead, so upcoming exams can put the day into exam mode.
-  const { data: events } = useEvents(today, today ? addDays(today, 7) : null);
+  // A week either side: upcoming exams set exam mode, recent plans inform suggestions.
+  const { data: events } = useEvents(today ? addDays(today, -7) : null, today ? addDays(today, 7) : null);
   const holidays = useHolidays(today, today);
   const { data: sources, loaded: sourcesLoaded } = useSources();
   const reminders = useReminders();
@@ -107,6 +108,8 @@ export function TodayContent() {
           empty={sourcesLoaded && sources.length === 0 ? "Add your timetable link in Settings to see lectures here." : "Nothing scheduled today."}
         />
       </Section>
+
+      <TodaySuggestions today={today} events={events} mode={mode} daysToShopping={shoppingDay} />
 
       <TodayWorkout today={today} events={todaysEvents} mode={mode} />
 

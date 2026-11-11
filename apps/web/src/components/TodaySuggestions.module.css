@@ -1,0 +1,16 @@
+.dismiss {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+@media (hover: hover) {
+  .dismiss:hover {
+    background: var(--fill);
+    color: var(--text);
+  }
+}

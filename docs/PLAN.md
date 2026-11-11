@@ -66,6 +66,8 @@ Big features are developed on a branch and merged to `main` at each milestone.
   - Meals: lunch and dinner for each day, saved meals with ingredients; planning one adds its missing ingredients to the shopping list
   - Modes: exams in the next week go to the top of Today and lighten workouts; in Portugal the gym becomes home or a run, and shopping-day nudges pause
   - Reminder notifications to your phone each morning (see `docs/notifications.md`)
-- [ ] **Phase 3 – Smarter:** rules-based suggestion engine, then an optional Claude daily brief and free-text capture ("gym cancelled, out of eggs").
+- [ ] **Phase 3 – Smarter**
+  - [x] Rules-based suggestions on Today ("For today"): revision time before exams, plan meals before shopping, free evenings, long gaps between lectures, a nudge after quiet days, empty weekends. Each can be acted on or dismissed for the day. Free, no AI.
+  - [ ] Optional Claude daily brief and free-text capture ("gym cancelled, out of eggs"). Needs a Claude API key with pay-as-you-go credit (billed separately from a Claude subscription); waiting on a decision.
 - [ ] **Phase 4 – SwiftUI app** for iPhone/iPad, plus Apple Health auto-logging of workouts.
 - [ ] **Phase 5 – ESP32 alarm** so the phone can stay out of the bedroom.
