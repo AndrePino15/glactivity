@@ -46,9 +46,15 @@ The owner wants a **personal assistant** that manages his time, not only suggest
     - **Autopilot**: books things directly and reports what it did.
     The "suggest, don't impose" rule above applies in Suggest mode and to anything outside work blocks (events with other people, meals, shopping) in Plan mode.
 12. **Each run's pipeline**: read memory and new notes → learn from yesterday (what got done, actual durations) → plan (blocks before deadlines) → brief and suggestions → write the activity log and update the profile.
-13. **Budget**: no Anthropic API. Everything runs on the owner's subscription. Only if "Run now" cannot trigger the scheduled task, a tiny API budget (owner's cap: £5/month) may be proposed for that one feature, with his approval.
+13. **Goals and big projects**: the long-term layer above tasks. Examples from the owner: an internship, finishing a personal project, a master's at Imperial.
+    - A **goal** has a title, why it matters, a target date (or "someday"), and status (active / paused / done).
+    - The agent **breaks each goal into milestones** with target dates (e.g. Imperial MSc → shortlist programmes, check entry requirements and application deadlines, draft personal statement, ask referees, submit), and milestones into **tasks**, which the planner turns into work blocks alongside coursework.
+    - **Weekly review** (Sunday evening run): progress per goal, what's slipping, and a short "this week for your goals" plan, balanced against deadlines and exams so goals never crowd out coursework near exams.
+    - Dates that come from the outside world (application deadlines, internship windows) must be **checked against official sources** where the run can search the web, shown with their source, and marked "to confirm" until the owner confirms. Never present a guessed deadline as fact.
+    - In the app: a **Goals** view (each goal with its milestones and what's next), and on Today a quiet line for the next goal step when one is planned. Goals can be added from the app, from any chat ("add a goal: apply to Imperial for an MSc"), or suggested by the agent from context, as a suggestion the owner accepts.
+14. **Budget**: no Anthropic API. Everything runs on the owner's subscription. Only if "Run now" cannot trigger the scheduled task, a tiny API budget (owner's cap: £5/month) may be proposed for that one feature, with his approval.
 
-Build this in stages, each verified and shipped before the next: (a) connector + memory + inbox + activity log; (b) tasks, planner, autonomy; (c) duration learning and profile; (d) scheduled task + "Run now".
+Build this in stages, each verified and shipped before the next: (a) connector + memory + inbox + activity log; (b) tasks, planner, autonomy; (c) goals, milestones and the weekly review; (d) duration learning and profile; (e) scheduled task + "Run now".
 
 ## Constraints
 
