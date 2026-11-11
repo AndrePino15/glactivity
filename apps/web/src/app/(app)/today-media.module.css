@@ -134,3 +134,9 @@
     gap: var(--space-6);
   }
 }
+
+.reroll {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  font: var(--text-footnote);
+}

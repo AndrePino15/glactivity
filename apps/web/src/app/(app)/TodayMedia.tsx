@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Cover } from "@/components/Cover";
+import { TextButton } from "@/components/ui";
 import { useAlbumOfTheWeek } from "@/lib/album";
 import { startOfWeek, type ISODate } from "@/lib/dates";
 import { useList } from "@/lib/db/hooks";
@@ -11,7 +12,7 @@ import styles from "./today-media.module.css";
 
 /** Album of the week as a large card, with the current book and next film beside it. */
 export function TodayMedia({ today }: { today: ISODate }) {
-  const { current } = useAlbumOfTheWeek(today);
+  const { current, reroll, canReroll } = useAlbumOfTheWeek(today);
   const books = useList("books");
   const movies = useList("movies");
   const book = books.data.find((b) => b.status === "active");
@@ -29,7 +30,7 @@ export function TodayMedia({ today }: { today: ISODate }) {
         <p className={styles.label}>Album of the week</p>
         {current ? (
           <a
-            href={current.apple_music_url ?? "/fun"}
+            href={current.apple_music_url ?? "/lists/listen"}
             target={current.apple_music_url ? "_blank" : undefined}
             rel="noreferrer"
             className={styles.albumLink}
@@ -38,7 +39,13 @@ export function TodayMedia({ today }: { today: ISODate }) {
             <span className={styles.albumTitle}>{current.title}</span>
             {current.artist && <span className={styles.albumArtist}>{current.artist}</span>}
           </a>
-        ) : (
+        ) : null}
+        {current && canReroll ? (
+          <TextButton className={styles.reroll} onClick={reroll}>
+            Pick another
+          </TextButton>
+        ) : null}
+        {current ? null : (
           <Link href="/lists/listen" className={styles.albumLink}>
             <span className={`${styles.albumCover} ${styles.emptyCover}`}>Add albums to Listen</span>
           </Link>

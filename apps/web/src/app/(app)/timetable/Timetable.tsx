@@ -4,6 +4,7 @@ import { useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { DayAgenda } from "@/components/calendar/DayAgenda";
 import { EventSheet, type EventSheetState } from "@/components/calendar/EventSheet";
+import { BlockSheet } from "@/components/tasks/BlockSheet";
 import { Note, PageHeader, Section, Segmented, TextButton, TextLink } from "@/components/ui";
 import { breakOn, eventsOn, holidaysOn } from "@/lib/calendar/day";
 import { addDays, addMonths, fromISODate, monthGrid, startOfWeek, type ISODate } from "@/lib/dates";
@@ -14,8 +15,11 @@ import {
   usePeriods,
   useProfile,
   useSources,
+  useTasks,
   useToday,
+  useWorkBlocks,
 } from "@/lib/db/hooks";
+import { withBlocks } from "@/lib/tasks";
 import type { CalendarEvent, Period } from "@/lib/db/types";
 import type { Holiday } from "@/lib/holidays";
 import styles from "./timetable.module.css";
@@ -42,6 +46,7 @@ export function Timetable() {
   const [view, setView] = useState<View>("day");
   const [picked, setPicked] = useState<ISODate | null>(null);
   const [sheet, setSheet] = useState<EventSheetState>(null);
+  const [block, setBlock] = useState<CalendarEvent["block"] | null>(null);
   const selected = picked ?? today;
 
   // The range each view needs.
@@ -50,7 +55,12 @@ export function Timetable() {
   const from = view === "month" ? (grid[0] ?? null) : week;
   const to = view === "month" ? (grid[41] ?? null) : week ? addDays(week, 6) : null;
 
-  const { data: events } = useEvents(from, to);
+  const { data: calendar } = useEvents(from, to);
+  const { data: blocks } = useWorkBlocks(from, to);
+  const { data: tasks } = useTasks();
+  // Study blocks sit among events in every view.
+  const events = withBlocks(calendar, blocks, tasks);
+  const open = (event: CalendarEvent) => (event.block ? setBlock(event.block) : setSheet({ kind: "open", event }));
   const holidays = useHolidays(from, to);
   const { data: periods } = usePeriods();
   const { data: profile } = useProfile();
@@ -110,7 +120,7 @@ export function Timetable() {
       {selected && view === "day" && (
         <>
           <WeekStrip week={week!} selected={selected} today={today} ctx={ctx} onPick={setPicked} />
-          <DaySection day={selected} ctx={ctx} onSelect={(event) => setSheet({ kind: "open", event })} />
+          <DaySection day={selected} ctx={ctx} onSelect={open} />
         </>
       )}
 
@@ -127,7 +137,7 @@ export function Timetable() {
                   events={eventsOn(day, events)}
                   holidays={holidaysOn(day, holidays, periods, home)}
                   empty="Nothing on"
-                  onSelect={(event) => setSheet({ kind: "open", event })}
+                  onSelect={open}
                 />
               </div>
             </section>
@@ -138,7 +148,7 @@ export function Timetable() {
       {selected && view === "month" && (
         <>
           <MonthGrid grid={grid} month={selected.slice(0, 7)} selected={selected} today={today} ctx={ctx} onPick={setPicked} />
-          <DaySection day={selected} ctx={ctx} onSelect={(event) => setSheet({ kind: "open", event })} />
+          <DaySection day={selected} ctx={ctx} onSelect={open} />
         </>
       )}
 
@@ -151,6 +161,7 @@ export function Timetable() {
       )}
 
       <EventSheet state={sheet} sources={sources} onClose={() => setSheet(null)} />
+      <BlockSheet block={block ?? null} onClose={() => setBlock(null)} />
     </>
   );
 }
@@ -242,7 +253,7 @@ function MonthGrid({
       {grid.map((day) => {
         const dayEvents = eventsOn(day, ctx.events);
         const holiday = holidaysOn(day, ctx.holidays, ctx.periods, ctx.home).length > 0;
-        const kinds = [...new Set(dayEvents.map((e) => e.category))].slice(0, 3);
+        const kinds = [...new Set(dayEvents.map((e) => (e.block ? "study" : e.category)))].slice(0, 3);
         return (
           <button
             key={day}

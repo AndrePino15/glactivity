@@ -23,7 +23,7 @@ export type AgentContext = {
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 /** Minutes the zone is ahead of UTC at this instant. */
-function zoneOffset(instant: number, timeZone: string): number {
+export function zoneOffset(instant: number, timeZone: string): number {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-GB", {
       timeZone,

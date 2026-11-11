@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { Button, List, Note, Row, Section, Sheet, TextButton } from "@/components/ui";
+import { Button, List, Note, Row, Section, Segmented, Sheet, TextButton } from "@/components/ui";
 import { refresh, write } from "@/lib/db/client";
-import { useAgentActivity, useAgentNotes, useToday } from "@/lib/db/hooks";
+import { useAgentActivity, useAgentNotes, useProfile, useToday } from "@/lib/db/hooks";
 import { formatShortDay, formatTime, relativeDay, toISODate } from "@/lib/dates";
-import type { AgentNote } from "@/lib/db/types";
+import type { AgentNote, Autonomy } from "@/lib/db/types";
 import styles from "../settings.module.css";
 import own from "./assistant.module.css";
 
@@ -26,6 +26,10 @@ export function AssistantSettings() {
     <>
       <Section title="Connect Claude">
         <ConnectorLink />
+      </Section>
+
+      <Section title="How much it does">
+        <AutonomyPicker />
       </Section>
 
       <Section title="What it knows about you">
@@ -61,6 +65,43 @@ export function AssistantSettings() {
 
       <Activity />
     </>
+  );
+}
+
+const AUTONOMY: { value: Autonomy; label: string; about: string }[] = [
+  { value: "suggest", label: "Suggest", about: "It only suggests. Nothing changes until you accept." },
+  {
+    value: "plan",
+    label: "Plan",
+    about: "It pencils study time for your tasks into free time. You keep, move or skip each block. Everything else is a suggestion.",
+  },
+  {
+    value: "autopilot",
+    label: "Autopilot",
+    about: "It books study time and adds tasks it spots, then tells you what it did. Plans with people, meals and shopping are still suggestions.",
+  },
+];
+
+function AutonomyPicker() {
+  const profile = useProfile();
+  const value = profile.data?.autonomy ?? "plan";
+
+  async function choose(next: Autonomy) {
+    if (!profile.data) return;
+    await profile.mutate(
+      async () => {
+        await write((db) => db.from("profiles").update({ autonomy: next }).eq("id", profile.data!.id));
+        return { ...profile.data!, autonomy: next };
+      },
+      { optimisticData: { ...profile.data, autonomy: next }, revalidate: false },
+    );
+  }
+
+  return (
+    <div className={styles.stack}>
+      <Segmented label="How much it does" value={value} options={AUTONOMY} onChange={choose} />
+      <Note>{AUTONOMY.find((a) => a.value === value)?.about}</Note>
+    </div>
   );
 }
 

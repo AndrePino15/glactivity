@@ -28,7 +28,7 @@ The timetable feed URL is personal and treated as a secret: it's stored in the d
 1. **Today:** greeting with the squirrel, 2–3 suggestions, the day's timeline (lectures, gym, meals), upcoming reminders, album of the week (cover + title + artist → Apple Music), daily games, current book.
 2. **Timetable:** day and week views of every calendar, colour-coded.
 3. **Lifestyle:** workout plan with options (gym split, home, run, rest), weekly meal plan that feeds the shopping list.
-4. **Fun:** album of the week (history + reroll), daily games launcher with a one-tap "played today", reading and watching.
+4. **Tasks:** coursework, applications and admin with deadlines and estimates; the assistant plans study time for them. (The Fun tab was folded into Today in Phase 3: album of the week with "Pick another", daily games, reading and watching. Previous albums are in Lists → Listen.)
 5. **Lists:** the week's shopping list (instant add; ticked items clear after shopping day), reminders (rent, bills, recurring), movies, books and albums to try. The albums list feeds the weekly pick.
 
 **Term modes:** term, break and exam periods switch the app's behaviour. Breaks are detected from gaps in the timetable feed and confirmed with one tap ("Going to Portugal?"), which switches holidays and suggestions.
@@ -70,7 +70,7 @@ Big features are developed on a branch and merged to `main` at each milestone.
   - [x] Rules-based suggestions on Today ("For today"): revision time before exams, plan meals before shopping, free evenings, long gaps between lectures, a nudge after quiet days, empty weekends. Each can be acted on or dismissed for the day. Free, no AI.
   - [ ] Claude assistant on the owner's subscription (no API credit). Agreed design and progress: [`docs/claude-agent.md`](claude-agent.md).
     - [x] (a) Glactivity connector for Claude (secret link from Settings → Assistant), memory (your notes, what it learned, a short profile), a brief and accept/dismiss ideas on Today, "Tell your assistant", and an activity log
-    - [ ] (b) Tasks and deadlines, the planner, autonomy setting
+    - [x] (b) Tasks tab (in place of Fun) with deadlines, estimates and progress; the planner pencils study blocks into free time (keep, move or skip them on Today and in the Timetable); Suggest / Plan / Autopilot setting
     - [ ] (c) Goals, milestones, the Goals section, goal planning and the weekly review
     - [ ] (d) Learning how long things take
     - [ ] (e) Scheduled task (07:00 and 18:00) and "Run now"
