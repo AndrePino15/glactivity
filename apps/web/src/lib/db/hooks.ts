@@ -186,6 +186,15 @@ export function useWorkBlocks(from: ISODate | null, to: ISODate | null) {
   );
 }
 
+/** Whether "Run now" is set up (the token itself never comes to the browser through this). */
+export function useRunNow() {
+  return useDb<{ connected: boolean; last_fired_at: string | null }>(
+    "run-now",
+    (db) => db.rpc("run_now_status"),
+    { connected: false, last_fired_at: null },
+  );
+}
+
 /** The assistant's briefs for a day (morning and/or evening). */
 export function useAgentBriefs(day: ISODate | null) {
   return useDb<AgentBrief[]>(

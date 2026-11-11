@@ -4,10 +4,11 @@ import { useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import { Button, EmptyState, List, Note, Row, Section, TextArea } from "@/components/ui";
 import { TaskSheet } from "@/components/tasks/TaskSheet";
-import { askForTask } from "@/lib/assistant/actions";
+import { askForTask, runNow } from "@/lib/assistant/actions";
 import { addDays, formatShortDay, formatTime, relativeDay, toISODate } from "@/lib/dates";
 import { write } from "@/lib/db/client";
-import { useAgentNotes, useTasks, useToday, useWorkBlocks } from "@/lib/db/hooks";
+import { useAgentNotes, useRunNow, useTasks, useToday, useWorkBlocks } from "@/lib/db/hooks";
+import { refresh } from "@/lib/db/client";
 import type { AgentNote, Task } from "@/lib/db/types";
 import { groupTasks, taskDetail, taskProgress } from "@/lib/tasks";
 import { useNow } from "@/lib/use-now";
@@ -25,6 +26,7 @@ export function TasksContent() {
   // Study time from two months back (time put in) to two months ahead.
   const blocks = useWorkBlocks(today ? addDays(today, -60) : null, today ? addDays(today, 60) : null);
   const [open, setOpen] = useState<Task | null>(null);
+  const runNowStatus = useRunNow();
 
   if (!today || !now) return null;
   const waiting = notes.data.filter((n) => n.topic === "task" && n.status === "new");
@@ -38,7 +40,7 @@ export function TasksContent() {
 
   return (
     <>
-      <AskBox />
+      <AskBox canRunNow={runNowStatus.data.connected} />
 
       {waiting.length > 0 && (
         <Section title="Waiting for your assistant">
@@ -60,7 +62,9 @@ export function TasksContent() {
             })}
           </List>
           <Note>
-            Your assistant sets these up at its next check. For it straight away, ask Claude: “Set up my new tasks.”
+            {runNowStatus.data.connected
+              ? "Your assistant is on it; this usually takes a minute or two. Otherwise it’s done at the next check."
+              : "Your assistant sets these up at its next check (about 06:45 and 17:45). For it straight away, ask Claude: “Set up my new tasks.”"}
           </Note>
         </Section>
       )}
@@ -119,7 +123,7 @@ export function TasksContent() {
   );
 }
 
-function AskBox() {
+function AskBox({ canRunNow }: { canRunNow: boolean }) {
   const [text, setText] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
 
@@ -132,6 +136,14 @@ function AskBox() {
       await askForTask(value);
       setText("");
       setState("sent");
+      // Start a check so it's set up within a minute or two, and look again while it runs.
+      if (canRunNow) {
+        const result = await runNow("task");
+        if (result.started) {
+          const timer = setInterval(() => void refresh("agent-notes", "tasks", "work-blocks"), 20_000);
+          setTimeout(() => clearInterval(timer), 5 * 60_000);
+        }
+      }
     } catch {
       setState("failed"); // what was typed stays in the box
     }
@@ -155,7 +167,9 @@ function AskBox() {
       <div className={styles.askFoot}>
         <p className={styles.hint}>
           {state === "sent"
-            ? "Sent. Your assistant will set it up."
+            ? canRunNow
+              ? "Sent. Your assistant is setting it up now."
+              : "Sent. Your assistant will set it up."
             : state === "failed"
               ? "Couldn’t send that. Try again?"
               : "Say what it is, when it’s due and roughly how long it takes."}

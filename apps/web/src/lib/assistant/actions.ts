@@ -15,6 +15,30 @@ export async function askForTask(body: string) {
   await refresh("agent-notes");
 }
 
+export type RunResult = { started: true; sessionUrl: string | null } | { started: false; message: string };
+
+/** Starts the assistant's check now (the scheduled task's API trigger, fired by our server). */
+export async function runNow(reason?: "task"): Promise<RunResult> {
+  try {
+    const response = await fetch("/api/assistant/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason }),
+    });
+    const body = (await response.json().catch(() => ({}))) as { session_url?: string; error?: string; wait_seconds?: number };
+    await refresh("agent-activity", "run-now");
+    if (response.ok) return { started: true, sessionUrl: body.session_url ?? null };
+    if (response.status === 429) return { started: false, message: "It started a moment ago. Give it a minute or two." };
+    if (response.status === 409) return { started: false, message: "Run now isn’t set up yet (Settings → Assistant)." };
+    const claude = (body as { status?: number }).status;
+    if (claude === 401 || claude === 403 || claude === 404)
+      return { started: false, message: "Claude didn’t accept the Run now key. Set it up again in Settings → Assistant." };
+    return { started: false, message: `It didn’t start: ${body.error ?? "something went wrong"}. Try again in a minute.` };
+  } catch {
+    return { started: false, message: "No connection. Try again in a minute." };
+  }
+}
+
 /** Applies the suggestion's change as you (row level security applies) and marks it accepted. */
 export async function acceptSuggestion(id: string) {
   await write((db) => db.rpc("accept_agent_suggestion", { suggestion_id: id }));

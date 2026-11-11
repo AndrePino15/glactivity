@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { Button, List, Note, Row, Section, Segmented, Sheet, TextButton } from "@/components/ui";
+import { Button, Label, List, Note, Row, Section, Segmented, Sheet, TextButton, TextField } from "@/components/ui";
 import { refresh, write } from "@/lib/db/client";
-import { useAgentActivity, useAgentNotes, useProfile, useToday } from "@/lib/db/hooks";
+import { useAgentActivity, useAgentNotes, useProfile, useRunNow, useToday } from "@/lib/db/hooks";
 import { formatShortDay, formatTime, relativeDay, toISODate } from "@/lib/dates";
 import type { AgentNote, Autonomy } from "@/lib/db/types";
 import styles from "../settings.module.css";
@@ -26,6 +26,10 @@ export function AssistantSettings() {
     <>
       <Section title="Connect Claude">
         <ConnectorLink />
+      </Section>
+
+      <Section title="Automatic checks">
+        <AutomaticChecks />
       </Section>
 
       <Section title="How much it does">
@@ -65,6 +69,107 @@ export function AssistantSettings() {
 
       <Activity />
     </>
+  );
+}
+
+const FIRE_URL = /^https:\/\/api\.anthropic\.com\/v1\/claude_code\/routines\/[A-Za-z0-9_-]+\/fire$/;
+
+/** When the scheduled checks run, and setting up "Run now" (the scheduled task's API trigger). */
+function AutomaticChecks() {
+  const status = useRunNow();
+  const [url, setUrl] = useState("");
+  const [token, setToken] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [confirmOff, setConfirmOff] = useState(false);
+
+  async function save() {
+    setError(null);
+    if (!FIRE_URL.test(url.trim())) {
+      setError("That doesn’t look like the trigger URL. It starts with https://api.anthropic.com/v1/claude_code/routines/ and ends with /fire.");
+      return;
+    }
+    if (token.trim().length < 20) {
+      setError("Paste the whole token (it’s long).");
+      return;
+    }
+    try {
+      await write((db) => db.rpc("set_run_now", { fire_url: url.trim(), token: token.trim() }));
+      setUrl("");
+      setToken("");
+      await status.mutate();
+      await refresh("agent-activity");
+    } catch {
+      setError("Couldn’t save that. Check both and try again.");
+    }
+  }
+
+  async function disconnect() {
+    await write((db) => db.rpc("clear_run_now"));
+    setConfirmOff(false);
+    await status.mutate();
+    await refresh("agent-activity");
+  }
+
+  return (
+    <div className={styles.stack}>
+      <Note>
+        Every morning and evening (about 06:45 and 17:45 UK time) your assistant reads your days, sets up tasks you’ve sent,
+        plans study time, writes the brief and suggests ideas. It runs on your Claude plan as the scheduled task “Glactivity
+        check”.
+      </Note>
+      {status.data.connected ? (
+        <>
+          <Note>Run now is on: the Run now button on Today, and tasks you send, start a check straight away.</Note>
+          <div className={styles.actions}>
+            {confirmOff ? (
+              <>
+                <TextButton className={styles.danger} onClick={disconnect}>
+                  Yes, turn off Run now
+                </TextButton>
+                <TextButton onClick={() => setConfirmOff(false)}>Cancel</TextButton>
+              </>
+            ) : (
+              <TextButton onClick={() => setConfirmOff(true)}>Turn off Run now</TextButton>
+            )}
+          </div>
+        </>
+      ) : status.loaded ? (
+        <>
+          <Note>
+            To add a Run now button: on claude.ai open Code → Scheduled tasks, tap “Glactivity check”, edit it, add a trigger
+            (API), then Generate token. Paste the URL and the token here; the token is only shown once.
+          </Note>
+          <Label text="Trigger URL">
+            <TextField
+              type="url"
+              inputMode="url"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="https://api.anthropic.com/v1/claude_code/routines/…/fire"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </Label>
+          <Label text="Token">
+            <TextField
+              type="password"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+          </Label>
+          {error && <p className={styles.error}>{error}</p>}
+          <div>
+            <Button onClick={save} disabled={!url.trim() || !token.trim()}>
+              Turn on Run now
+            </Button>
+          </div>
+        </>
+      ) : null}
+    </div>
   );
 }
 
