@@ -153,6 +153,8 @@ export type AgentNote = {
   kind: "inbox" | "learned" | "profile";
   body: string;
   status: "new" | "used" | null;
+  /** "task": a task you described for the assistant to set up. */
+  topic?: "task" | null;
   source: "app" | "claude";
   created_at: string;
   updated_at: string;

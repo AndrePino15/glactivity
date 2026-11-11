@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Button, Label, List, Note, Row, Segmented, Select, Sheet, TextButton, TextField } from "@/components/ui";
+import { Button, Label, List, Note, Row, Segmented, Select, Sheet, TextArea, TextButton, TextField } from "@/components/ui";
 import { formatShortDay, formatTime, toISODate, toTimestamp, type ISODate } from "@/lib/dates";
 import { refresh, write } from "@/lib/db/client";
 import type { Task, WorkBlock } from "@/lib/db/types";
@@ -99,21 +99,24 @@ function TaskForm({ task, blocks, today, onDone }: { task: Task; blocks: WorkBlo
   return (
     <div className={styles.form}>
       <form className={styles.form} onSubmit={save}>
-        <TextField aria-label="Task" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <div className={styles.times}>
-          <Label text="Due">
-            <TextField type="date" value={due} onChange={(e) => setDue(e.target.value)} />
-          </Label>
-          <Label text="Hours it takes">
-            <TextField inputMode="decimal" placeholder="5" value={hours} onChange={(e) => setHours(e.target.value)} />
-          </Label>
+        <Label text="Task">
+          <TextField value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </Label>
+        <Label text="Due">
+          <TextField type="date" value={due} onChange={(e) => setDue(e.target.value)} />
+        </Label>
+        <Label text="Hours it takes">
+          <TextField inputMode="decimal" placeholder="e.g. 5 or 1.5" value={hours} onChange={(e) => setHours(e.target.value)} />
+        </Label>
+        <div className={styles.group}>
+          <span className={styles.groupLabel}>Importance</span>
+          <Segmented label="Importance" value={priority} options={[...PRIORITIES]} onChange={setPriority} />
         </div>
-        <Segmented label="Priority" value={priority} options={[...PRIORITIES]} onChange={setPriority} />
-        <Label text="Module or subject (optional)">
+        <Label text="Module or subject">
           <TextField value={subject} onChange={(e) => setSubject(e.target.value)} />
         </Label>
-        <Label text="Notes (optional)">
-          <textarea className={styles.textarea} rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} />
+        <Label text="Notes">
+          <TextArea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={2000} />
         </Label>
         {error && <p className={styles.error}>{error}</p>}
         <div className={styles.actions}>

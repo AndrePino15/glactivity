@@ -289,6 +289,41 @@ export const TOOLS: Tool[] = [
     run: (args, rpc) => rpc("agent_withdraw_blocks", { block_ids: args.ids }),
   },
   {
+    name: "set_up_tasks",
+    title: "Set up tasks from a note",
+    description:
+      "Turn one of the owner's notes into tasks: he describes tasks in his own words in the app's Tasks tab (get_context → memory.new_from_owner " +
+      'with topic "task"). Read what he wrote and create every task it mentions, filling in what he said: a short clear title, the deadline ' +
+      "(due_on, due_time), how long it really takes (estimate_minutes; if he didn't say, estimate it from his profile and say so in notes), " +
+      "priority (1 high to 3 low, from urgency and weight) and module/subject. Files the note. He asked for these, so it works whatever the " +
+      "autonomy setting. Afterwards plan study time for them (find_free_time, then plan_blocks).",
+    inputSchema: object(
+      {
+        note_id: { type: "string", format: "uuid" },
+        tasks: {
+          type: "array",
+          minItems: 1,
+          maxItems: 10,
+          items: object(
+            {
+              title: { type: "string", maxLength: 200 },
+              due_on: DAY,
+              due_time: { type: "string", pattern: "^\\d{2}:\\d{2}$", description: "HH:MM, UK time" },
+              estimate_minutes: { type: "integer", minimum: 0, maximum: 6000 },
+              priority: { type: "integer", minimum: 1, maximum: 3 },
+              subject: { type: "string", maxLength: 80 },
+              notes: { type: "string", maxLength: 2000 },
+            },
+            ["title"],
+          ),
+        },
+      },
+      ["note_id", "tasks"],
+    ),
+    annotations: write,
+    run: (args, rpc) => rpc("agent_set_up_tasks", { note_id: args.note_id, tasks: args.tasks }),
+  },
+  {
     name: "add_task",
     title: "Add a task",
     description:

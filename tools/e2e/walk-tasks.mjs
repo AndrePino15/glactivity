@@ -43,14 +43,15 @@ await step("Tasks tab replaces Fun; /fun goes to Today", async () => {
   return tabs.join(" · ");
 });
 
-await step("quick-add a task", async () => {
+await step("describe a task in your own words", async () => {
   await page.goto(BASE + "/tasks");
   await page.waitForSelector("text=Nothing on your plate");
   await page.screenshot({ path: `${OUT}/01-tasks-empty.png`, fullPage: true });
-  await page.fill("input[aria-label='Add a task']", "History essay 5h due Fri !");
-  await page.press("input[aria-label='Add a task']", "Enter");
-  await page.waitForSelector("text=History essay");
-  return await page.locator("li:has-text('History essay')").innerText();
+  await page.fill("textarea[aria-label='Tell your assistant about a task']", "History essay for HIST2001, about 5 hours, due Friday. It's an important one.");
+  await page.click("form button:has-text('Send')");
+  await page.waitForSelector("text=Waiting for your assistant");
+  await page.waitForSelector("text=Sent. Your assistant will set it up.");
+  await page.screenshot({ path: `${OUT}/01b-tasks-waiting.png`, fullPage: true });
 });
 
 await step("settings shows Plan as the default", async () => {
@@ -59,6 +60,19 @@ await step("settings shows Plan as the default", async () => {
   link = (await page.textContent("[data-testid=connector-link]")).trim();
   while (!link.includes("/api/mcp/")) { await page.waitForTimeout(200); link = (await page.textContent("[data-testid=connector-link]")).trim(); }
   await page.locator("section:has(h2:text-is('How much it does'))").screenshot({ path: `${OUT}/02-autonomy.png` });
+});
+
+await step("Claude sets the task up from your note", async () => {
+  ctx = await tool("get_context");
+  const request = ctx.memory.new_from_owner.find((n) => n.topic === "task");
+  if (!request) throw new Error("no task note: " + JSON.stringify(ctx.memory.new_from_owner));
+  const friday = Array.from({ length: 7 }, (_, i) => new Date(Date.parse(ctx.today) + i * 86400000)).find((d) => d.getUTCDay() === 5).toISOString().slice(0, 10);
+  await tool("set_up_tasks", { note_id: request.id, tasks: [{ title: "History essay", due_on: friday, estimate_minutes: 300, priority: 1, subject: "HIST2001" }] });
+  await page.goto(BASE + "/tasks");
+  await page.waitForSelector("li:has-text('History essay')");
+  if (await page.locator("text=Waiting for your assistant").count()) throw new Error("note still waiting");
+  await page.screenshot({ path: `${OUT}/01c-tasks-set-up.png`, fullPage: true });
+  return await page.locator("li:has-text('History essay')").innerText();
 });
 
 await step("Claude sees the task and finds free time", async () => {

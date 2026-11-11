@@ -6,7 +6,8 @@ Runs the real web app in a browser against stand-ins, so features can be checked
 - `seed.sql`: test data for that user (shopping, albums, books, films, reminders).
 - `feed-server.mjs`: a fake university timetable feed at `http://localhost:54400/feed.ics` (lectures this week, a gap that reads as a break) and placeholder covers at `/cover/N.svg`.
 - `push/push-server.mjs`: a fake push service on `https://localhost:54500` that records encrypted deliveries. Needs a self-signed `key.pem`/`cert.pem` in `push/` (`openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 2 -subj "/CN=localhost"`).
-- `walk-tasks.mjs`: the Tasks tab, Claude planning study blocks in each autonomy mode, and keeping, moving and skipping them.
+- `shots-sheets.mjs` and `shots-pages.mjs`: iPhone-sized screenshots in WebKit (Safari's engine) that flag fields spilling out of sheets or overlapping, and pages wider than the screen. WebKit isn't preinstalled: `PLAYWRIGHT_BROWSERS_PATH=<folder> npx playwright install webkit` and `install-deps webkit`, then run with the same `PLAYWRIGHT_BROWSERS_PATH`.
+- `walk-tasks.mjs`: describing a task for the assistant and Claude setting it up, Claude planning study blocks in each autonomy mode, and keeping, moving and skipping them.
 - `walk-assistant.mjs`: plays Claude through the connector link (brief, ideas, notes) and checks Today, Lists and Settings → Assistant.
 - `walk-*.mjs`: Playwright walk-throughs that print ok/FAIL per step and save screenshots to the folder given as the first argument.
 

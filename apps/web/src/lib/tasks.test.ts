@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Task, WorkBlock } from "./db/types";
-import { formatMinutes, groupTasks, parseQuickTask, taskDetail, taskProgress, withBlocks } from "./tasks";
+import { formatMinutes, groupTasks, taskDetail, taskProgress, withBlocks } from "./tasks";
 
 const TODAY = "2026-11-17"; // a Tuesday
 
@@ -30,18 +30,6 @@ const block = (over: Partial<WorkBlock>): WorkBlock => ({
   ...over,
 });
 
-describe("quick task", () => {
-  it("reads estimate, deadline and urgency", () => {
-    expect(parseQuickTask("History essay 5h due Fri", TODAY)).toEqual({ title: "History essay", due_on: "2026-11-20", estimate_minutes: 300, priority: 2 });
-    expect(parseQuickTask("Lab report 90m by 3 Dec !", TODAY)).toEqual({ title: "Lab report", due_on: "2026-12-03", estimate_minutes: 90, priority: 1 });
-    expect(parseQuickTask("Read chapter 4 tomorrow 1.5 hours", TODAY)).toMatchObject({ title: "Read chapter 4", due_on: "2026-11-18", estimate_minutes: 90 });
-  });
-
-  it("leaves the deadline empty when there isn't one", () => {
-    expect(parseQuickTask("Tidy notes", TODAY)).toEqual({ title: "Tidy notes", due_on: null, estimate_minutes: null, priority: 2 });
-  });
-});
-
 describe("progress", () => {
   const now = new Date("2026-11-17T12:00:00Z");
   const blocks = [
@@ -52,11 +40,11 @@ describe("progress", () => {
 
   it("counts kept time that has passed as done, and future blocks as planned", () => {
     expect(taskProgress(task(), blocks, now)).toEqual({ spent: 120, planned: 60, share: 0.4, unplanned: 120 });
-    expect(taskDetail(task({ subject: "HIST2001" }), blocks, now)).toBe("Due Fri 20 Nov · HIST2001 · 5 h · 2 h done · 1 h planned");
+    expect(taskDetail(task({ subject: "HIST2001" }), blocks, now).replace(/\u00a0/g, " ")).toBe("Due Fri 20 Nov · HIST2001 · 5 h · 2 h done · 1 h planned");
   });
 
   it("formats durations simply", () => {
-    expect([formatMinutes(45), formatMinutes(60), formatMinutes(90), formatMinutes(300)]).toEqual(["45 min", "1 h", "1.5 h", "5 h"]);
+    expect([formatMinutes(45), formatMinutes(60), formatMinutes(90), formatMinutes(300)]).toEqual(["45\u00a0min", "1\u00a0h", "1.5\u00a0h", "5\u00a0h"]);
   });
 });
 

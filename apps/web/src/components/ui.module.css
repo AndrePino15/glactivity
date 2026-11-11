@@ -173,7 +173,18 @@ button.rowMain:active {
 }
 
 .field {
+  /* Long example text ends in "…" rather than mid-word. */
+  text-overflow: ellipsis;
+  display: block;
   width: 100%;
+  /* Phones give date and time inputs a minimum width of their own; without
+     these they push past the edge of a sheet or into the field beside them. */
+  min-width: 0;
+  max-width: 100%;
+  min-height: 48px;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
   padding: 12px 14px;
   border: 0.5px solid var(--separator);
   border-radius: var(--radius-sm);
@@ -186,6 +197,29 @@ button.rowMain:active {
 
 .field:focus {
   border-color: var(--text-secondary);
+}
+
+/* Same height and left-aligned text as the other fields, on iPhone too. */
+.field[type="date"],
+.field[type="time"] {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  text-align: left;
+}
+
+.field::-webkit-date-and-time-value {
+  margin: 0;
+  text-align: left;
+}
+
+.field::-webkit-datetime-edit {
+  padding: 0;
+}
+
+textarea.field {
+  min-height: 96px;
+  resize: vertical;
 }
 
 .field::placeholder {
@@ -270,6 +304,8 @@ button.rowMain:active {
 }
 
 .sheet {
+  /* The sheet takes focus when it opens, so no field or button shows a ring. */
+  outline: none;
   width: 100%;
   max-width: 560px;
   max-height: 88dvh;

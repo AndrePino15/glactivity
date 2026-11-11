@@ -9,6 +9,12 @@ export async function tellAssistant(body: string) {
   await refresh("agent-notes");
 }
 
+/** Describes a task in your own words; the assistant sets it up (set_up_tasks). */
+export async function askForTask(body: string) {
+  await write((db) => db.from("agent_notes").insert({ kind: "inbox", body, status: "new", topic: "task" }));
+  await refresh("agent-notes");
+}
+
 /** Applies the suggestion's change as you (row level security applies) and marks it accepted. */
 export async function acceptSuggestion(id: string) {
   await write((db) => db.rpc("accept_agent_suggestion", { suggestion_id: id }));

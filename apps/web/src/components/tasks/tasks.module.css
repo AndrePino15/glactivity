@@ -4,13 +4,24 @@
   gap: var(--space-4);
 }
 
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupLabel {
+  color: var(--text-secondary);
+  font: var(--text-footnote);
+}
+
 .when {
   font: var(--text-headline);
 }
 
 .times {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
@@ -44,21 +55,6 @@
   font: var(--text-footnote);
 }
 
-.textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 0.5px solid var(--separator);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font: 400 16px/22px var(--font);
-  resize: vertical;
-  outline: none;
-}
-
-.textarea:focus {
-  border-color: var(--text-secondary);
-}
-
 .study {
   display: flex;
   flex-direction: column;
@@ -73,33 +69,46 @@
 
 /* Tasks page */
 
-.add {
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   margin-bottom: var(--space-6);
 }
 
-.input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 0.5px solid var(--separator);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font: 400 16px/21px var(--font);
-  outline: none;
-  transition: border-color 0.15s var(--ease);
-}
-
-.input::placeholder {
-  color: var(--text-tertiary);
-}
-
-.input:focus {
-  border-color: var(--text-secondary);
+.askFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
 .hint {
-  margin-top: var(--space-2);
   color: var(--text-tertiary);
   font: var(--text-footnote);
+}
+
+/* Long titles and details wrap instead of being cut off. */
+.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.remove {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text-tertiary);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+@media (hover: hover) {
+  .remove:hover {
+    background: var(--fill);
+    color: var(--text);
+  }
 }
 
 /* A thin bar for how much of the estimate is done. */
@@ -124,8 +133,3 @@
   color: var(--cat-exam);
 }
 
-@media (hover: hover) {
-  .input:hover:not(:focus) {
-    border-color: var(--fill-strong);
-  }
-}

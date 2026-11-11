@@ -176,6 +176,11 @@ export function TextField({ className, ...props }: ComponentProps<"input">) {
   return <input className={cx(styles.field, className)} {...props} />;
 }
 
+/** Multi-line text with the same look as TextField. */
+export function TextArea({ className, ...props }: ComponentProps<"textarea">) {
+  return <textarea className={cx(styles.field, className)} {...props} />;
+}
+
 export function Select({ className, ...props }: ComponentProps<"select">) {
   return <select className={cx(styles.field, styles.select, className)} {...props} />;
 }
@@ -256,12 +261,15 @@ export function Sheet({
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
+    // Focus the sheet itself rather than its first button (which would show a ring).
+    dialog.setAttribute("autofocus", "");
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
   }, [open]);
   return (
     <dialog
       ref={ref}
+      tabIndex={-1}
       className={styles.sheet}
       onClose={onClose}
       onClick={(e) => {

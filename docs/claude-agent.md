@@ -91,6 +91,10 @@ Build this in stages, each verified and shipped before the next: (a) connector +
 - Fixes: Glactivity is named as the main calendar in the connector; the evening brief is saved for the day it's written; ideas for the coming days show on Today with their day.
 - Browser check: `tools/e2e/walk-tasks.mjs`.
 
+**Follow-up to (b), from the owner's feedback (12 Nov 2026):**
+- Adding a task works like telling the assistant: the Tasks tab has a "Tell your assistant about a task" box; what's typed is saved as an inbox note with `topic = 'task'` (`backend/supabase/migrations/20261114000000_task_requests.sql`) and listed under "Waiting for your assistant". The next check, or a chat ("set up my new tasks"), turns it into one or more tasks with the connector tool `set_up_tasks` (title, deadline, hours — estimated from the profile if not given — priority, subject) and files the note. These are the owner's own requests, so they're added whatever the autonomy setting. The task sheet stays for corrections. Tests: `backend/tests/task-requests.test.ts`.
+- Phone layout: date and time fields no longer spill out of sheets or overlap (shared field style: `min-width: 0`, same height as other fields, two-column rows use `minmax(0, 1fr)`); the task sheet is one field per row; sheets no longer show a focus ring on "Close"; long example text ends in "…". Checked on iPhone SE and iPhone 15 sizes in WebKit (`tools/e2e/shots-sheets.mjs`, `tools/e2e/shots-pages.mjs`).
+
 **Adding the connector:** Settings → Assistant → Copy link, then at claude.ai/customize/connectors → Add custom connector, name "Glactivity", paste the link, no sign-in. Try it in a chat: "What's my week like?" or "Do my Glactivity morning check".
 
 ## Constraints

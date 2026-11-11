@@ -108,7 +108,7 @@ function TellBox() {
           setText(e.target.value);
           if (state !== "saving") setState("idle");
         }}
-        placeholder="Tell your assistant… (dentist Tuesday 3pm)"
+        placeholder="Tell your assistant something…"
         aria-label="Tell your assistant"
         enterKeyHint="send"
         autoCapitalize="sentences"
