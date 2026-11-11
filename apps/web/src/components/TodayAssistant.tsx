@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Section, TextButton } from "@/components/ui";
-import { acceptLabel, acceptSuggestion, dismissSuggestion, tellAssistant } from "@/lib/assistant/actions";
+import { acceptLabel, acceptSuggestion, dismissSuggestion, runNow, tellAssistant } from "@/lib/assistant/actions";
+import { refresh } from "@/lib/db/client";
 import { addDays, formatShortDay, formatTime, type ISODate } from "@/lib/dates";
-import { useAgentBriefs, useAgentSuggestions } from "@/lib/db/hooks";
+import { useAgentBriefs, useAgentSuggestions, useRunNow } from "@/lib/db/hooks";
 import type { AgentSuggestion } from "@/lib/db/types";
 import styles from "./TodayAssistant.module.css";
 
@@ -17,9 +18,20 @@ export function TodayAssistant({ today }: { today: ISODate }) {
   const suggestions = useAgentSuggestions(today);
   // The latest brief written today.
   const brief = [...briefs.data].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  const run = useRunCheck();
 
   return (
-    <Section title="Assistant">
+    <Section
+      title="Assistant"
+      action={
+        run.available && (
+          <TextButton onClick={run.start} disabled={run.state === "starting"}>
+            {run.state === "starting" ? "Starting…" : "Run now"}
+          </TextButton>
+        )
+      }
+    >
+      {run.message && <p className={styles.meta}>{run.message}</p>}
       {brief && (
         <div className={styles.brief}>
           <p>{brief.body}</p>
@@ -119,4 +131,42 @@ function TellBox() {
       {state === "failed" && <p className={styles.error}>Couldn’t save that. Try again?</p>}
     </form>
   );
+}
+
+/**
+ * "Run now": starts the assistant's check, then refreshes Today every 20
+ * seconds for a few minutes so the new brief and ideas appear by themselves.
+ */
+function useRunCheck() {
+  const status = useRunNow();
+  const [state, setState] = useState<"idle" | "starting" | "running">("idle");
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (state !== "running") return;
+    const timer = setInterval(() => void refresh("agent-", "work-blocks", "tasks"), 20_000);
+    const stop = setTimeout(() => {
+      setState("idle");
+      setMessage(null);
+    }, 5 * 60_000);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(stop);
+    };
+  }, [state]);
+
+  async function start() {
+    setState("starting");
+    setMessage(null);
+    const result = await runNow();
+    if (result.started) {
+      setState("running");
+      setMessage("Checking now. The brief and ideas update here in a minute or two.");
+    } else {
+      setState("idle");
+      setMessage(result.message);
+    }
+  }
+
+  return { available: status.data.connected, state, message, start };
 }
