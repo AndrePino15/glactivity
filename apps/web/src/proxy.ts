@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isSupabaseConfigured, supabaseKey, supabaseUrl } from "@/lib/supabase/config";
 
-// The daily reminder job is called by the database, not a signed-in browser;
-// it checks its own token.
-const PUBLIC_PATHS = ["/login", "/api/cron"];
+// The daily reminder job is called by the database and the Claude connector by
+// Claude, not a signed-in browser; each checks its own secret.
+const PUBLIC_PATHS = ["/login", "/api/cron", "/api/mcp"];
 
 /**
  * Keeps the Supabase session fresh and sends signed-out visitors to /login.

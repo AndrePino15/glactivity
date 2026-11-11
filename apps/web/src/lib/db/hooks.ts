@@ -7,6 +7,10 @@ import type { Holiday } from "@/lib/holidays";
 import { useNow } from "@/lib/use-now";
 import { refresh, useDb } from "./client";
 import type {
+  AgentActivity,
+  AgentBrief,
+  AgentNote,
+  AgentSuggestion,
   AlbumPick,
   CalendarEvent,
   CalendarSource,
@@ -151,6 +155,41 @@ export function useSuggestionFeedback(day: ISODate | null) {
   return useDb<{ key: string; response: "done" | "dismissed" }[]>(
     day ? `suggestion-feedback:${day}` : null,
     (db) => db.from("suggestion_feedback").select("key, response").eq("day", day!),
+    [],
+  );
+}
+
+/** The assistant's briefs for a day (morning and/or evening). */
+export function useAgentBriefs(day: ISODate | null) {
+  return useDb<AgentBrief[]>(
+    day ? `agent-briefs:${day}` : null,
+    (db) => db.from("agent_briefs").select("*").eq("day", day!).order("slot"),
+    [],
+  );
+}
+
+/** The assistant's open suggestions for a day. */
+export function useAgentSuggestions(day: ISODate | null) {
+  return useDb<AgentSuggestion[]>(
+    day ? `agent-suggestions:${day}` : null,
+    (db) => db.from("agent_suggestions").select("*").eq("day", day!).eq("status", "open").order("created_at"),
+    [],
+  );
+}
+
+/** Everything the assistant remembers: your notes, what it learned, its profile of you. */
+export function useAgentNotes() {
+  return useDb<AgentNote[]>(
+    "agent-notes",
+    (db) => db.from("agent_notes").select("*").order("created_at", { ascending: false }),
+    [],
+  );
+}
+
+export function useAgentActivity() {
+  return useDb<AgentActivity[]>(
+    "agent-activity",
+    (db) => db.from("agent_activity").select("id, at, actor, summary").order("at", { ascending: false }).limit(40),
     [],
   );
 }

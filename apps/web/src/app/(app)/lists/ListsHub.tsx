@@ -4,7 +4,8 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { refresh } from "@/lib/db/client";
-import { useList, useReminders, useToday } from "@/lib/db/hooks";
+import { useAgentNotes, useList, useReminders, useToday } from "@/lib/db/hooks";
+import { tellAssistant } from "@/lib/assistant/actions";
 import type { ListItem } from "@/lib/db/types";
 import { relativeDay } from "@/lib/dates";
 import { addMediaItem, addQuickReminder, addShoppingItem } from "@/lib/quick-add";
@@ -31,6 +32,8 @@ export function ListsHub() {
   const movies = useList("movies");
   const books = useList("books");
   const albums = useList("albums");
+  const notes = useAgentNotes();
+  const unread = notes.data.filter((n) => n.kind === "inbox" && n.status === "new").length;
 
   const toBuy = shopping.data.filter((i) => i.status === "open").length;
   const next = today ? upcomingReminders(reminders.data, today, 3650)[0] : undefined;
@@ -87,6 +90,13 @@ export function ListsHub() {
           await addMediaItem("albums", text);
           await refresh("items:albums");
         }}
+      />
+      <QuickAdd
+        href="/settings/assistant"
+        name="Assistant"
+        summary={unread ? `${plural(unread, "new note")} for its next check` : "Tell it anything"}
+        placeholder="Train mornings this month"
+        onAdd={tellAssistant}
       />
     </ul>
   );

@@ -3,6 +3,7 @@
 import { DayAgenda } from "@/components/calendar/DayAgenda";
 import { DailyGames } from "@/components/fun/DailyGames";
 import { TodayMeals } from "@/components/lifestyle/TodayMeals";
+import { TodayAssistant } from "@/components/TodayAssistant";
 import { TodaySuggestions } from "@/components/TodaySuggestions";
 import { TodayWorkout } from "@/components/lifestyle/TodayWorkout";
 import { Button, Check, List, Note, Row, Section, TextButton } from "@/components/ui";
@@ -108,6 +109,8 @@ export function TodayContent() {
           empty={sourcesLoaded && sources.length === 0 ? "Add your timetable link in Settings to see lectures here." : "Nothing scheduled today."}
         />
       </Section>
+
+      <TodayAssistant today={today} />
 
       <TodaySuggestions today={today} events={events} mode={mode} daysToShopping={shoppingDay} />
 
