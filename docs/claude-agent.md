@@ -72,6 +72,20 @@ The owner wants a **personal assistant** that manages his time, not only suggest
 
 Build this in stages, each verified and shipped before the next: (a) connector + memory + inbox + activity log; (b) tasks, planner, autonomy; (c) goals, milestones, the Goals section with progress, the goal-planning pipeline and `save_goal_plan`, and the weekly review; (d) duration learning and profile; (e) scheduled task + "Run now".
 
+## Progress
+
+**Findings (11 Nov 2026), before building:**
+- claude.ai custom connectors support OAuth (Dynamic Client Registration, or Claude's published client identity) or no sign-in; custom request headers are a limited beta. Supabase can be the OAuth server, but that feature is in beta and needs dashboard switches. **Chosen with the owner: the secret link** (no sign-in, a 64-character secret in the URL path, kept in `private.agent_links`, replaceable from Settings).
+- Scheduled tasks (claude.ai/code/routines, or `/schedule`): model chosen per task, effort where the model offers it; daily times via cron (UTC unless `CRON_TZ=` is given); minimum interval hourly; a fresh session per run; connected claude.ai connectors are included; runs use subscription usage. An **API trigger** (`POST https://api.anthropic.com/v1/claude_code/routines/<id>/fire` with a per-task token generated in the web UI, beta header `experimental-cc-routine-2026-04-01`) makes "Run now" possible without an API key. Tasks can belong to a claude.ai Project, but there a run may continue a thread instead of starting fresh; Claude Code tasks (needed for the API trigger) already live apart from normal chats.
+
+**Stage (a): done.**
+- Database: `backend/supabase/migrations/20261112000000_assistant.sql` (`agent_notes` for inbox / learned / profile, `agent_briefs`, `agent_suggestions`, `agent_activity`, `private.agent_links`; token-guarded `agent_*` functions; `accept_agent_suggestion` runs as the owner under RLS). Tests: `backend/tests/assistant.test.ts`.
+- Connector: `apps/web/src/app/api/mcp/[secret]/route.ts` and `apps/web/src/lib/assistant/` (a small stateless MCP server: tools, the `glactivity_check` prompt, and today's free-rule suggestions worked out on the server). No delete tools; every write is logged.
+- App: the Assistant section on Today (brief, ideas with Accept / Not now, "Tell your assistant"), an Assistant box in Lists, and Settings → Assistant (connector link, profile, learned notes, your notes, activity).
+- Browser check: `tools/e2e/walk-assistant.mjs`.
+
+**Adding the connector:** Settings → Assistant → Copy link, then at claude.ai/customize/connectors → Add custom connector, name "Glactivity", paste the link, no sign-in. Try it in a chat: "What's my week like?" or "Do my Glactivity morning check".
+
 ## Constraints
 
 - Follow `CLAUDE.md` (agree on features first; merge to `main` at milestones) and `design/README.md` (clean, no boxes for their own sake, sections only when they have content).
