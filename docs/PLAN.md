@@ -68,6 +68,11 @@ Big features are developed on a branch and merged to `main` at each milestone.
   - Reminder notifications to your phone each morning (see `docs/notifications.md`)
 - [ ] **Phase 3 – Smarter**
   - [x] Rules-based suggestions on Today ("For today"): revision time before exams, plan meals before shopping, free evenings, long gaps between lectures, a nudge after quiet days, empty weekends. Each can be acted on or dismissed for the day. Free, no AI.
-  - [ ] Claude agent on the owner's subscription (no API credit): a Glactivity MCP connector + a scheduled task twice a day, memory that learns habits, brief and accept/dismiss suggestions on Today, "Run now". Agreed design: [`docs/claude-agent.md`](claude-agent.md).
+  - [ ] Claude assistant on the owner's subscription (no API credit). Agreed design and progress: [`docs/claude-agent.md`](claude-agent.md).
+    - [x] (a) Glactivity connector for Claude (secret link from Settings → Assistant), memory (your notes, what it learned, a short profile), a brief and accept/dismiss ideas on Today, "Tell your assistant", and an activity log
+    - [ ] (b) Tasks and deadlines, the planner, autonomy setting
+    - [ ] (c) Goals, milestones, the Goals section, goal planning and the weekly review
+    - [ ] (d) Learning how long things take
+    - [ ] (e) Scheduled task (07:00 and 18:00) and "Run now"
 - [ ] **Phase 4 – SwiftUI app** for iPhone/iPad, plus Apple Health auto-logging of workouts.
 - [ ] **Phase 5 – ESP32 alarm** so the phone can stay out of the bedroom.

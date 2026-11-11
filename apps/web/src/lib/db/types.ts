@@ -141,3 +141,35 @@ export type MealPlanEntry = {
   title: string;
   meal_id: string | null;
 };
+
+export type AgentNote = {
+  id: string;
+  kind: "inbox" | "learned" | "profile";
+  body: string;
+  status: "new" | "used" | null;
+  source: "app" | "claude";
+  created_at: string;
+  updated_at: string;
+};
+
+export type AgentBrief = { id: string; day: string; slot: "morning" | "evening"; body: string; created_at: string };
+
+/** What Accept will do (validated by the database when Claude proposes it). */
+export type AgentChange =
+  | { type: "add_event"; title: string; starts_at: string; ends_at: string; location?: string; category?: EventCategory }
+  | { type: "add_shopping_items"; items: string[] }
+  | { type: "set_meal"; day: string; slot: MealSlot; title: string }
+  | { type: "add_reminder"; title: string; due_on: string; recurrence?: Recurrence }
+  | { type: "add_list_item"; list: ListKind; title: string; subtitle?: string };
+
+export type AgentSuggestion = {
+  id: string;
+  day: string;
+  title: string;
+  detail: string | null;
+  change: AgentChange | null;
+  status: "open" | "accepted" | "dismissed";
+  created_at: string;
+};
+
+export type AgentActivity = { id: string; at: string; actor: "claude" | "you"; summary: string };
