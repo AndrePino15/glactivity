@@ -22,6 +22,34 @@ Agreed with the owner on 11 Nov 2026. Replaces the paid "Claude API" plan: the a
 3. **Scheduled task** on the owner's account: **Claude Sonnet 5.5** (medium effort if it can be set), **07:00 and 18:00 UK time**, a **fresh session each run** (memory lives in the database, not the chat), connector attached. If scheduled runs can be placed in a claude.ai Project, put them in a "Glactivity" project to keep them out of normal chats. The run's prompt: read context + notes → write brief and up to 3 suggestions that the free rules don't already cover → update notes. Short and calm, never guilt, British English.
 4. **"Run now" button** on Today: start the same run on demand. Only if the scheduled task can be triggered from outside (a private trigger URL/token the app can call server-side). If not possible, document the fallbacks: "Run now" from the task in the Claude app, or ask Claude in chat to "do my Glactivity check".
 
+## Extended scope (agreed 11 Nov 2026, after the first draft)
+
+The owner wants a **personal assistant** that manages his time, not only suggestions. Add:
+
+5. **How the assistant is organised** (explain it this way to the owner):
+   - **Memory = the Glactivity database.** The only permanent part. Every run or chat is a fresh Claude that reads memory first and writes back what it learned.
+   - **Brain = Claude on the owner's subscription** (scheduled runs, and any Claude chat with the connector enabled).
+   - **Hands = the Glactivity connector** (MCP tools).
+   - Scheduled runs can't read the owner's other Claude chats or Claude's own memory, so **Glactivity is the shared brain**: normal chats save deadlines, plans and context into Glactivity through the connector; the agent reads it all from there.
+6. **"Tell your assistant" inbox**: a box in the app (Today, and the Lists hub) where the owner types context ("dentist next Tuesday afternoon", "train in the mornings this month"). Stored as a note marked **new**; the next run reads it, plans around it, and files it (marks it used, or folds it into the profile). Chats can add notes through the connector too.
+7. **Memory layout**:
+   - **Owner's notes** (inbox, new/used).
+   - **Profile of the owner**: one short document the agent rewrites as it learns (habits, best focus times, how long things really take, what works and what doesn't). Kept small on purpose. Readable and editable in Settings → "What Glactivity has learned".
+   - **Plans and history**: events, tasks, work blocks done/skipped, suggestion feedback (already exists), workout/meal history.
+   - **Activity log**: every run records what it changed and why; shown in the app so the owner can see what the assistant did.
+8. **Tasks and deadlines**: title, due date, estimated hours, priority, optional module/subject, progress. Added from the app, from any chat, or by the agent from context.
+9. **Planner**: the agent places **work blocks** for tasks into real free time, around lectures, exams, training, meals and sleep, respecting deadlines, and re-plans when things change. Blocks show on Today and in the Timetable.
+10. **Learning durations**: when a block ends, one tap: **Done** / **Needed more** / **Didn't do it**. Actual time feeds the profile ("underestimates essays by ~40%", "focuses best in the mornings") and future estimates.
+11. **Autonomy setting** (Settings), changeable any time:
+    - **Suggest**: proposals only; nothing changes until accepted.
+    - **Plan** (**default**): the agent puts work blocks into the timetable as **tentative**; the owner can move, skip or accept them; it adapts.
+    - **Autopilot**: books things directly and reports what it did.
+    The "suggest, don't impose" rule above applies in Suggest mode and to anything outside work blocks (events with other people, meals, shopping) in Plan mode.
+12. **Each run's pipeline**: read memory and new notes → learn from yesterday (what got done, actual durations) → plan (blocks before deadlines) → brief and suggestions → write the activity log and update the profile.
+13. **Budget**: no Anthropic API. Everything runs on the owner's subscription. Only if "Run now" cannot trigger the scheduled task, a tiny API budget (owner's cap: £5/month) may be proposed for that one feature, with his approval.
+
+Build this in stages, each verified and shipped before the next: (a) connector + memory + inbox + activity log; (b) tasks, planner, autonomy; (c) duration learning and profile; (d) scheduled task + "Run now".
+
 ## Constraints
 
 - Follow `CLAUDE.md` (agree on features first; merge to `main` at milestones) and `design/README.md` (clean, no boxes for their own sake, sections only when they have content).
