@@ -18,7 +18,7 @@ export async function askForTask(body: string) {
 export type RunResult = { started: true; sessionUrl: string | null } | { started: false; message: string };
 
 /** Starts the assistant's check now (the scheduled task's API trigger, fired by our server). */
-export async function runNow(reason?: "task"): Promise<RunResult> {
+export async function runNow(reason?: "task" | "goal"): Promise<RunResult> {
   try {
     const response = await fetch("/api/assistant/run", {
       method: "POST",
@@ -37,6 +37,18 @@ export async function runNow(reason?: "task"): Promise<RunResult> {
   } catch {
     return { started: false, message: "No connection. Try again in a minute." };
   }
+}
+
+/** Describes a goal in your own words; the next check drafts a plan for it. */
+export async function askForGoal(body: string) {
+  await write((db) => db.from("agent_notes").insert({ kind: "inbox", body, status: "new", topic: "goal" }));
+  await refresh("agent-notes");
+}
+
+/** Answers the assistant's questions on a goal; the next check refines the plan. */
+export async function answerGoal(goalId: string, body: string) {
+  await write((db) => db.from("goal_notes").insert({ goal_id: goalId, kind: "answer", body }));
+  await refresh("goal-notes");
 }
 
 /** Applies the suggestion's change as you (row level security applies) and marks it accepted. */

@@ -1,6 +1,7 @@
 import { addDays } from "../dates";
 import { freeTime } from "./freetime";
-import { checkSteps } from "./instructions";
+import { milestoneState, progressFromTotals } from "../goals";
+import { checkSteps, goalPlanningSteps } from "./instructions";
 import { ruleSuggestions, type AgentContext } from "./rules";
 
 /** Calls a token-guarded database function; the route fills in the secret. */
@@ -48,6 +49,92 @@ const CHANGE = {
   required: ["type"],
 };
 
+type GoalContext = {
+  goals: {
+    title: string;
+    status: string;
+    milestones: {
+      status: string;
+      target_date: string | null;
+      tasks: { status: string; estimate_minutes: number | null; spent_minutes: number }[];
+    }[];
+  }[];
+  this_week_for_goals: unknown;
+};
+
+/** Adds the app's own progress figures to each goal and milestone, so Claude and the app agree. */
+function withProgress(ctx: GoalContext, today: string) {
+  return {
+    goals: ctx.goals.map((g) => {
+      const counted = g.milestones.filter((m) => m.status !== "dropped");
+      const overall = progressFromTotals(counted.flatMap((m) => m.tasks));
+      return {
+        ...g,
+        progress: { percent: Math.round(overall.share * 100), done_minutes: overall.done, total_minutes: overall.estimate },
+        milestones: g.milestones.map((m) => {
+          const p = progressFromTotals(m.tasks);
+          return { ...m, progress_percent: Math.round(p.share * 100), state: milestoneState(m as never, p, today) };
+        }),
+      };
+    }),
+    this_week_for_goals: ctx.this_week_for_goals,
+  };
+}
+
+const GOAL_TASK = object(
+  {
+    id: { type: "string", format: "uuid", description: "Only to change an existing task" },
+    title: { type: "string", maxLength: 200 },
+    estimate_minutes: { type: "integer", minimum: 0, maximum: 6000 },
+    due_on: DAY,
+    priority: { type: "integer", minimum: 1, maximum: 3 },
+    notes: { type: "string", maxLength: 2000 },
+  },
+  [],
+);
+
+const GOAL_PLAN = object(
+  {
+    goal: object(
+      {
+        id: { type: "string", format: "uuid", description: "Leave out for a new goal" },
+        title: { type: "string", maxLength: 200 },
+        why: { type: "string", maxLength: 2000 },
+        target_date: { ...DAY, description: "YYYY-MM-DD; leave out for someday" },
+        status: { type: "string", enum: ["draft", "active", "paused", "done"] },
+      },
+      [],
+    ),
+    milestones: {
+      type: "array",
+      maxItems: 12,
+      items: object(
+        {
+          id: { type: "string", format: "uuid", description: "Only to change an existing milestone" },
+          title: { type: "string", maxLength: 200 },
+          target_date: DAY,
+          position: { type: "integer", minimum: 0 },
+          status: { type: "string", enum: ["open", "done", "dropped"] },
+          date_source_url: { type: "string", description: "Official page an outside date came from; the date shows as 'to confirm'" },
+          date_confirmed: { type: "boolean" },
+          notes: { type: "string", maxLength: 2000 },
+          tasks: { type: "array", maxItems: 20, items: GOAL_TASK },
+        },
+        [],
+      ),
+    },
+    sources: {
+      type: "array",
+      maxItems: 10,
+      items: object({ title: { type: "string" }, url: { type: "string" }, note: { type: "string" } }, ["url"]),
+    },
+    questions: { type: "array", maxItems: 6, items: { type: "string", maxLength: 500 }, description: "What you need him to answer" },
+    notes: { type: "string", maxLength: 2000 },
+    from_note_id: { type: "string", format: "uuid", description: "The inbox note (topic goal) this plan comes from; filed once saved" },
+  },
+  ["goal"],
+);
+
 export const TOOLS: Tool[] = [
   {
     name: "get_context",
@@ -57,16 +144,18 @@ export const TOOLS: Tool[] = [
       "tasks and deadlines with study blocks (and the autonomy setting: suggest, plan or autopilot), " +
       "training plan and log, meal plan and saved meals, reminders, shopping list, what he's reading/watching/listening to, " +
       "games played, feedback on suggestions, the free rules-based suggestions already on Today, and your memory " +
-      "(profile, his new notes, what you've learned). Call this first.",
+      "(profile, his new notes, what you've learned), and his goals with milestones, progress (weighted by hours), open questions " +
+      "and his answers. Call this first.",
     inputSchema: object({
       days_back: { type: "integer", minimum: 0, maximum: 31, default: 7 },
       days_ahead: { type: "integer", minimum: 0, maximum: 62, default: 7 },
     }),
     annotations: read,
     run: async (args, rpc) => {
-      const [ctx, plans] = await Promise.all([
+      const [ctx, plans, goals] = await Promise.all([
         rpc("agent_context", { days_back: args.days_back ?? 7, days_ahead: args.days_ahead ?? 7 }) as Promise<AgentContext>,
         rpc("agent_plan_context", { days_ahead: Math.max(14, Number(args.days_ahead ?? 7)) }) as Promise<Record<string, unknown>>,
+        rpc("agent_goal_context", {}) as Promise<GoalContext>,
       ]);
       let rules: { title: string; detail: string }[] = [];
       try {
@@ -74,7 +163,7 @@ export const TOOLS: Tool[] = [
       } catch {
         // The rules are a nice-to-have here; the context still stands.
       }
-      return { ...ctx, ...plans, free_suggestions_on_today: rules };
+      return { ...ctx, ...plans, ...withProgress(goals, ctx.today), free_suggestions_on_today: rules };
     },
   },
   {
@@ -385,6 +474,149 @@ export const TOOLS: Tool[] = [
         notes: args.notes ?? null,
         status: args.status ?? null,
       }),
+  },
+  {
+    name: "get_goal_planning_steps",
+    title: "How to plan a goal",
+    description:
+      "The steps for planning a big goal well (understand, research official dates, shape milestones, estimate, schedule backwards, check capacity, " +
+      "show, save). mode: chat (with the owner, asking questions), draft (in a check, from a note he left, with questions for him) or replan " +
+      "(when a goal slips, or in the weekly review). Read this before save_goal_plan.",
+    inputSchema: object({ mode: { type: "string", enum: ["chat", "draft", "replan"] } }, ["mode"]),
+    annotations: read,
+    run: async (args) => ({ steps: goalPlanningSteps(args.mode === "draft" ? "draft" : args.mode === "replan" ? "replan" : "chat") }),
+  },
+  {
+    name: "save_goal_plan",
+    title: "Save a goal plan",
+    description:
+      "Create or update a goal and everything under it in one call: milestones in order with target dates, tasks with hour estimates, " +
+      "official sources, and questions for the owner. New goals are drafts unless you set status active (only when he has agreed the plan " +
+      "with you). Items with an id are updated; without one they're added. Nothing is deleted: drop a milestone with status dropped. " +
+      "Dates from outside sources must carry date_source_url and are shown as 'to confirm' until he confirms. Follow get_goal_planning_steps first.",
+    inputSchema: GOAL_PLAN,
+    annotations: write,
+    run: (args, rpc) => rpc("agent_save_goal_plan", { plan: args }),
+  },
+  {
+    name: "add_goal",
+    title: "Add a goal",
+    description:
+      "Quickly add a goal the owner mentions (title, why, target date) as a draft, to plan properly later. For a full plan use save_goal_plan.",
+    inputSchema: object(
+      { title: { type: "string", maxLength: 200 }, why: { type: "string", maxLength: 2000 }, target_date: DAY },
+      ["title"],
+    ),
+    annotations: write,
+    run: (args, rpc) => rpc("agent_save_goal_plan", { plan: { goal: { title: args.title, why: args.why, target_date: args.target_date } } }),
+  },
+  {
+    name: "update_goal",
+    title: "Update a goal",
+    description: "Change a goal's title, why, target date or status (draft, active, paused, done). Activate a draft only when the owner agrees.",
+    inputSchema: object(
+      {
+        id: { type: "string", format: "uuid" },
+        title: { type: "string", maxLength: 200 },
+        why: { type: "string", maxLength: 2000 },
+        target_date: DAY,
+        status: { type: "string", enum: ["draft", "active", "paused", "done"] },
+      },
+      ["id"],
+    ),
+    annotations: overwrite,
+    run: (args, rpc) => {
+      const goal = Object.fromEntries(Object.entries(args).filter(([, v]) => v !== undefined && v !== null));
+      return rpc("agent_save_goal_plan", { plan: { goal } });
+    },
+  },
+  {
+    name: "add_milestone",
+    title: "Add a milestone",
+    description: "Add one milestone (with optional tasks) to the end of a goal. For several changes at once use save_goal_plan.",
+    inputSchema: object(
+      {
+        goal_id: { type: "string", format: "uuid" },
+        title: { type: "string", maxLength: 200 },
+        target_date: DAY,
+        date_source_url: { type: "string" },
+        tasks: { type: "array", maxItems: 20, items: GOAL_TASK },
+      },
+      ["goal_id", "title"],
+    ),
+    annotations: write,
+    run: (args, rpc) =>
+      rpc("agent_save_goal_plan", {
+        plan: {
+          goal: { id: args.goal_id },
+          milestones: [{ title: args.title, target_date: args.target_date, date_source_url: args.date_source_url, tasks: args.tasks ?? [] }],
+        },
+      }),
+  },
+  {
+    name: "update_milestone",
+    title: "Update a milestone",
+    description: "Change a milestone's title or target date, mark it done or dropped, or record that a date from an outside source is confirmed.",
+    inputSchema: object(
+      {
+        id: { type: "string", format: "uuid" },
+        title: { type: "string", maxLength: 200 },
+        target_date: DAY,
+        status: { type: "string", enum: ["open", "done", "dropped"] },
+        date_source_url: { type: "string" },
+        date_confirmed: { type: "boolean" },
+      },
+      ["id"],
+    ),
+    annotations: overwrite,
+    run: (args, rpc) =>
+      rpc("agent_update_milestone", {
+        milestone_id: args.id,
+        title: args.title ?? null,
+        target_date: args.target_date ?? null,
+        status: args.status ?? null,
+        date_source_url: args.date_source_url ?? null,
+        date_confirmed: args.date_confirmed ?? null,
+      }),
+  },
+  {
+    name: "add_goal_note",
+    title: "Note on a goal",
+    description:
+      "Add a note, an official source (with url) or a question for the owner to a goal; and/or mark questions you've dealt with and answers " +
+      "you've used as resolved (resolve_ids).",
+    inputSchema: object(
+      {
+        goal_id: { type: "string", format: "uuid" },
+        kind: { type: "string", enum: ["note", "source", "question"] },
+        body: { type: "string", maxLength: 2000 },
+        url: { type: "string" },
+        resolve_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      },
+      ["goal_id"],
+    ),
+    annotations: write,
+    run: (args, rpc) =>
+      rpc("agent_goal_notes", {
+        goal_id: args.goal_id,
+        kind: args.kind ?? null,
+        body: args.body ?? null,
+        url: args.url ?? null,
+        resolve_ids: args.resolve_ids ?? null,
+      }),
+  },
+  {
+    name: "log_progress",
+    title: "Log progress",
+    description:
+      "When the owner tells you he worked on something outside planned blocks (\"spent 2 hours on the statement\"), record the minutes " +
+      "against the task; done: true also marks it finished. Goal progress updates from this.",
+    inputSchema: object(
+      { task_id: { type: "string", format: "uuid" }, minutes: { type: "integer", minimum: 5, maximum: 240 }, done: { type: "boolean" } },
+      ["task_id"],
+    ),
+    annotations: write,
+    run: (args, rpc) => rpc("agent_log_progress", { task_id: args.task_id, minutes: args.minutes ?? null, done: args.done ?? false }),
   },
   {
     name: "get_run_steps",

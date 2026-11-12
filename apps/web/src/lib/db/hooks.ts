@@ -12,6 +12,9 @@ import type {
   AgentNote,
   AgentSuggestion,
   AlbumPick,
+  Goal,
+  GoalNote,
+  Milestone,
   CalendarEvent,
   CalendarSource,
   Game,
@@ -182,6 +185,28 @@ export function useWorkBlocks(from: ISODate | null, to: ISODate | null) {
         .lt("starts_at", fromISODate(addDays(to!, 1)).toISOString())
         .gt("ends_at", fromISODate(from!).toISOString())
         .order("starts_at"),
+    [],
+  );
+}
+
+export function useGoals() {
+  return useDb<Goal[]>("goals", (db) => db.from("goals").select("*").order("created_at"), []);
+}
+
+export function useMilestones() {
+  return useDb<Milestone[]>("milestones", (db) => db.from("milestones").select("*").order("position"), []);
+}
+
+/** Questions, answers, notes and sources on all your goals. */
+export function useGoalNotes() {
+  return useDb<GoalNote[]>("goal-notes", (db) => db.from("goal_notes").select("*").order("created_at"), []);
+}
+
+/** The latest "this week for your goals" from the Sunday evening check. */
+export function useWeeklyReview() {
+  return useDb<AgentBrief[]>(
+    "agent-week",
+    (db) => db.from("agent_briefs").select("*").eq("slot", "week").order("day", { ascending: false }).limit(1),
     [],
   );
 }

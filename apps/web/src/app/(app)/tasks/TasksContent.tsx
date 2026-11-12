@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { X } from "lucide-react";
-import { Button, EmptyState, List, Note, Row, Section, TextArea } from "@/components/ui";
+import { useState } from "react";
+import { EmptyState, List, Row, Section } from "@/components/ui";
+import { AskBox, cancelNote, Waiting } from "@/components/tasks/AskBox";
 import { TaskSheet } from "@/components/tasks/TaskSheet";
-import { askForTask, runNow } from "@/lib/assistant/actions";
-import { addDays, formatShortDay, formatTime, relativeDay, toISODate } from "@/lib/dates";
-import { write } from "@/lib/db/client";
-import { useAgentNotes, useRunNow, useTasks, useToday, useWorkBlocks } from "@/lib/db/hooks";
-import { refresh } from "@/lib/db/client";
-import type { AgentNote, Task } from "@/lib/db/types";
+import { askForTask } from "@/lib/assistant/actions";
+import { addDays, relativeDay } from "@/lib/dates";
+import { useAgentNotes, useGoals, useMilestones, useRunNow, useTasks, useToday, useWorkBlocks } from "@/lib/db/hooks";
+import type { Task } from "@/lib/db/types";
+import { hiddenTaskIds } from "@/lib/goals";
 import { groupTasks, taskDetail, taskProgress } from "@/lib/tasks";
 import { useNow } from "@/lib/use-now";
 import styles from "@/components/tasks/tasks.module.css";
@@ -27,47 +26,37 @@ export function TasksContent() {
   const blocks = useWorkBlocks(today ? addDays(today, -60) : null, today ? addDays(today, 60) : null);
   const [open, setOpen] = useState<Task | null>(null);
   const runNowStatus = useRunNow();
+  const goals = useGoals();
+  const milestones = useMilestones();
 
   if (!today || !now) return null;
+  const canRunNow = runNowStatus.data.connected;
   const waiting = notes.data.filter((n) => n.topic === "task" && n.status === "new");
-  const groups = groupTasks(tasks.data, today);
-  const done = tasks.data.filter((t) => t.status === "done").slice(0, 8);
-
-  async function cancel(note: AgentNote) {
-    await write((db) => db.from("agent_notes").delete().eq("id", note.id));
-    await notes.mutate();
-  }
+  // Tasks of draft or paused goals wait on the goal's page until it's active.
+  const hidden = hiddenTaskIds(goals.data, milestones.data, tasks.data);
+  const visible = tasks.data.filter((t) => !hidden.has(t.id));
+  const groups = groupTasks(visible, today);
+  const done = visible.filter((t) => t.status === "done").slice(0, 8);
 
   return (
     <>
-      <AskBox canRunNow={runNowStatus.data.connected} />
+      <AskBox
+        label="Tell your assistant about a task"
+        placeholder="Lab report, about 3 hours, due next Wednesday"
+        hint="Say what it is, when it’s due and roughly how long it takes."
+        sentHint={{ now: "Sent. Your assistant is setting it up now.", later: "Sent. Your assistant will set it up." }}
+        reason="task"
+        canRunNow={canRunNow}
+        onSend={askForTask}
+      />
 
-      {waiting.length > 0 && (
-        <Section title="Waiting for your assistant">
-          <List>
-            {waiting.map((n) => {
-              const day = toISODate(new Date(n.created_at));
-              return (
-                <Row
-                  key={n.id}
-                  title={<span className={styles.wrap}>{n.body}</span>}
-                  detail={`Sent ${day === today ? "today" : formatShortDay(day)}, ${formatTime(n.created_at)}`}
-                  trailing={
-                    <button type="button" className={styles.remove} aria-label={`Cancel: ${n.body}`} onClick={() => cancel(n)}>
-                      <X size={16} strokeWidth={2} />
-                    </button>
-                  }
-                />
-              );
-            })}
-          </List>
-          <Note>
-            {runNowStatus.data.connected
-              ? "Your assistant is on it; this usually takes a minute or two. Otherwise it’s done at the next check."
-              : "Your assistant sets these up at its next check (about 06:45 and 17:45). For it straight away, ask Claude: “Set up my new tasks.”"}
-          </Note>
-        </Section>
-      )}
+      <Waiting
+        notes={waiting}
+        today={today}
+        canRunNow={canRunNow}
+        later="Your assistant sets these up at its next check (about 06:45 and 17:45). For it straight away, ask Claude: “Set up my new tasks.”"
+        onCancel={cancelNote}
+      />
 
       {tasks.loaded && groups.length === 0 && waiting.length === 0 && (
         <EmptyState pose="celebrating" title="Nothing on your plate">
@@ -120,64 +109,5 @@ export function TasksContent() {
 
       <TaskSheet task={open} blocks={blocks.data} today={today} onClose={() => setOpen(null)} />
     </>
-  );
-}
-
-function AskBox({ canRunNow }: { canRunNow: boolean }) {
-  const [text, setText] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    const value = text.trim();
-    if (!value || state === "sending") return;
-    setState("sending");
-    try {
-      await askForTask(value);
-      setText("");
-      setState("sent");
-      // Start a check so it's set up within a minute or two, and look again while it runs.
-      if (canRunNow) {
-        const result = await runNow("task");
-        if (result.started) {
-          const timer = setInterval(() => void refresh("agent-notes", "tasks", "work-blocks"), 20_000);
-          setTimeout(() => clearInterval(timer), 5 * 60_000);
-        }
-      }
-    } catch {
-      setState("failed"); // what was typed stays in the box
-    }
-  }
-
-  return (
-    <form onSubmit={submit} className={styles.ask}>
-      <TextArea
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          if (state !== "sending") setState("idle");
-        }}
-        placeholder="Lab report, about 3 hours, due next Wednesday"
-        aria-label="Tell your assistant about a task"
-        rows={3}
-        maxLength={1000}
-        autoCapitalize="sentences"
-        disabled={state === "sending"}
-      />
-      <div className={styles.askFoot}>
-        <p className={styles.hint}>
-          {state === "sent"
-            ? canRunNow
-              ? "Sent. Your assistant is setting it up now."
-              : "Sent. Your assistant will set it up."
-            : state === "failed"
-              ? "Couldn’t send that. Try again?"
-              : "Say what it is, when it’s due and roughly how long it takes."}
-        </p>
-        <Button type="submit" disabled={!text.trim() || state === "sending"}>
-          {state === "sending" ? "Sending…" : "Send"}
-        </Button>
-      </div>
-    </form>
   );
 }

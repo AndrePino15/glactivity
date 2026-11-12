@@ -23,10 +23,14 @@ import {
   useProfile,
   useReminders,
   useSources,
+  useGoals,
+  useMilestones,
   useTasks,
   useToday,
   useWorkBlocks,
 } from "@/lib/db/hooks";
+import { hiddenTaskIds, nextGoalBlock } from "@/lib/goals";
+import { useNow } from "@/lib/use-now";
 import type { CalendarEvent, Country, Period, Reminder } from "@/lib/db/types";
 import { dueSoon, withBlocks } from "@/lib/tasks";
 import { modeOn } from "@/lib/modes";
@@ -46,6 +50,10 @@ export function TodayContent() {
   const shopping = useList("shopping");
   const tasks = useTasks();
   const blocks = useWorkBlocks(today, today);
+  const weekBlocks = useWorkBlocks(today, today ? addDays(today, 7) : null);
+  const goals = useGoals();
+  const milestones = useMilestones();
+  const now = useNow();
   const [block, setBlock] = useState<CalendarEvent["block"] | null>(null);
 
   if (!today) return null;
@@ -59,7 +67,11 @@ export function TodayContent() {
   const shoppingDay = profile ? daysUntilWeekday(today, profile.shopping_day) : null;
   const todaysEvents = eventsOn(today, events);
   const schedule = withBlocks(todaysEvents, blocks.data, tasks.data);
-  const due = dueSoon(tasks.data, today);
+  // Tasks of draft or paused goals wait on the goal's page.
+  const hidden = hiddenTaskIds(goals.data, milestones.data, tasks.data);
+  const due = dueSoon(tasks.data.filter((t) => !hidden.has(t.id)), today);
+  // A quiet line for the soonest study time planned this week on an active goal.
+  const nextGoalStep = now ? nextGoalBlock(goals.data, milestones.data, tasks.data, weekBlocks.data, now) : null;
   const mode = modeOn(today, events, periods, home);
 
   async function answerBreak(period: Period, country: Country) {
@@ -133,6 +145,18 @@ export function TodayContent() {
                 href="/tasks"
               />
             ))}
+          </List>
+        </Section>
+      )}
+
+      {nextGoalStep && (
+        <Section title="Next goal step">
+          <List>
+            <Row
+              title={nextGoalStep.task.title}
+              detail={`${nextGoalStep.goal.title} · ${relativeDay(today, toISODate(new Date(nextGoalStep.startsAt)))}, ${formatTime(nextGoalStep.startsAt)}`}
+              href={`/tasks/goals/${nextGoalStep.goal.id}`}
+            />
           </List>
         </Section>
       )}
