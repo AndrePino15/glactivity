@@ -1,4 +1,4 @@
-import { checkSteps, SERVER_INSTRUCTIONS } from "./instructions";
+import { checkSteps, goalPlanningSteps, SERVER_INSTRUCTIONS } from "./instructions";
 import { TOOLS, type Rpc } from "./tools";
 
 /**
@@ -22,6 +22,12 @@ const PROMPTS = [
     title: "Glactivity check",
     description: "Morning or evening check: read memory and context, learn, brief, up to 3 suggestions, log.",
     arguments: [{ name: "slot", description: "morning or evening", required: true }],
+  },
+  {
+    name: "plan_a_goal",
+    title: "Plan a goal",
+    description: "Plan a big goal with Claude, step by step: understand, research official dates, milestones, hours, schedule, then save it to Glactivity.",
+    arguments: [{ name: "goal", description: "The goal, in your words (e.g. apply to Imperial for an MSc in AI)", required: false }],
   },
 ];
 
@@ -82,6 +88,21 @@ export async function handleMessage(message: Message, rpc: Rpc): Promise<Reply |
     case "prompts/list":
       return ok(id, { prompts: PROMPTS });
     case "prompts/get": {
+      if (params.name === "plan_a_goal") {
+        const goal = String((params.arguments as { goal?: string } | undefined)?.goal ?? "").slice(0, 500);
+        return ok(id, {
+          description: PROMPTS[1].description,
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: `${goal ? `I want to plan this goal: ${goal}\n\n` : "I want to plan a goal with you.\n\n"}Use Glactivity: call get_context first (my goals, tasks, timetable and profile), then follow these steps.\n\n${goalPlanningSteps("chat")}`,
+              },
+            },
+          ],
+        });
+      }
       if (params.name !== "glactivity_check") return fail(id, -32602, `Unknown prompt: ${String(params.name)}`);
       const slot = (params.arguments as { slot?: string } | undefined)?.slot === "evening" ? "evening" : "morning";
       return ok(id, {

@@ -56,10 +56,28 @@ describe("planning tools", () => {
     const rpc = vi.fn(async (fn: string) =>
       fn === "agent_plan_context"
         ? { autonomy: "plan", tasks: [{ title: "Essay" }], blocks: [] }
-        : { today: "2026-11-17", now: "2026-11-17T08:00:00Z", timezone: TZ, profile: null, events: [], periods: [], training_plan: [], training_log: [], meal_plan: [], media: [], rule_suggestion_feedback: [] },
+        : fn === "agent_goal_context"
+          ? {
+              goals: [
+                {
+                  title: "Imperial MSc",
+                  status: "active",
+                  milestones: [
+                    { status: "done", target_date: "2026-11-01", tasks: [{ status: "done", estimate_minutes: 120, spent_minutes: 0 }] },
+                    { status: "open", target_date: "2026-11-19", tasks: [{ status: "open", estimate_minutes: 360, spent_minutes: 60 }] },
+                  ],
+                },
+              ],
+              this_week_for_goals: null,
+            }
+          : { today: "2026-11-17", now: "2026-11-17T08:00:00Z", timezone: TZ, profile: null, events: [], periods: [], training_plan: [], training_log: [], meal_plan: [], media: [], rule_suggestion_feedback: [] },
     );
     const reply = await handleMessage({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "get_context", arguments: {} } }, rpc);
     expect(reply?.result).toMatchObject({ structuredContent: { autonomy: "plan", tasks: [{ title: "Essay" }], today: "2026-11-17" } });
+    const goal = (reply?.result as { structuredContent: { goals: { progress: object; milestones: { state: string }[] }[] } }).structuredContent.goals[0];
+    // 120 done + 60 of 360 = 180 of 480; the open milestone needs 300 minutes in 2 days.
+    expect(goal.progress).toEqual({ percent: 38, done_minutes: 180, total_minutes: 480 });
+    expect(goal.milestones.map((m) => m.state)).toEqual(["done", "at_risk"]);
   });
 
   it("finds free time for the next days", async () => {
@@ -79,5 +97,41 @@ describe("planning tools", () => {
     const list = await handleMessage({ jsonrpc: "2.0", id: 4, method: "tools/list" }, vi.fn());
     const addEvent = (list?.result as { tools: { name: string; description: string }[] }).tools.find((t) => t.name === "add_event");
     expect(addEvent?.description).toMatch(/main calendar/);
+  });
+});
+
+describe("goal planning", () => {
+  it("serves the planning steps for chats, drafts and re-plans", async () => {
+    for (const mode of ["chat", "draft", "replan"]) {
+      const reply = await handleMessage({ jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "get_goal_planning_steps", arguments: { mode } } }, vi.fn());
+      const steps = (reply?.result as { structuredContent: { steps: string } }).structuredContent.steps;
+      expect(steps).toContain("official sources");
+      expect(steps).toContain(mode === "draft" ? "questions" : mode === "replan" ? "dropped" : "once I agree");
+    }
+  });
+
+  it("offers a Plan a goal prompt", async () => {
+    const list = await handleMessage({ jsonrpc: "2.0", id: 6, method: "prompts/list" }, vi.fn());
+    expect((list?.result as { prompts: { name: string }[] }).prompts.map((p) => p.name)).toContain("plan_a_goal");
+    const prompt = await handleMessage(
+      { jsonrpc: "2.0", id: 7, method: "prompts/get", params: { name: "plan_a_goal", arguments: { goal: "Imperial MSc in AI" } } },
+      vi.fn(),
+    );
+    expect((prompt?.result as { messages: { content: { text: string } }[] }).messages[0].content.text).toMatch(/Imperial MSc in AI[\s\S]*Schedule backwards/);
+  });
+
+  it("saves a plan in one call and turns update_goal into the same call", async () => {
+    const rpc = vi.fn(async () => ({ goal_id: "g" }));
+    await handleMessage({ jsonrpc: "2.0", id: 8, method: "tools/call", params: { name: "update_goal", arguments: { id: "g", status: "paused" } } }, rpc);
+    expect(rpc).toHaveBeenCalledWith("agent_save_goal_plan", { plan: { goal: { id: "g", status: "paused" } } });
+  });
+
+  it("adds the weekly review to Sunday evening checks only", async () => {
+    const steps = async (slot: string) =>
+      ((await handleMessage({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name: "get_run_steps", arguments: { slot } } }, vi.fn()))?.result as {
+        structuredContent: { steps: string };
+      }).structuredContent.steps;
+    expect(await steps("evening")).toContain("Sundays only");
+    expect(await steps("morning")).not.toContain("Sundays only");
   });
 });

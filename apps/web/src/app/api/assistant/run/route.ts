@@ -29,7 +29,11 @@ export async function POST(request: Request) {
   // The check reads this as information, not instructions.
   const text =
     `Run now, from the Glactivity app at ${londonTime.format(new Date())} UK time.` +
-    (reason === "task" ? " The owner has just described a new task in the app." : "");
+    (reason === "task"
+      ? " The owner has just described a new task in the app."
+      : reason === "goal"
+        ? " The owner has just described a goal, or answered questions about one, in the app."
+        : "");
 
   try {
     const response = await fetch(url, {

@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Settings } from "lucide-react";
@@ -7,13 +8,40 @@ import { NAV_ITEMS, isActive } from "@/lib/nav";
 import { Mascot } from "./Mascot";
 import styles from "./Navigation.module.css";
 
-/** Bottom tab bar on phones. */
+/**
+ * Pages whose address holds an id (a goal) only know it at request time, so
+ * the highlighted tab waits in Suspense; the bar itself shows straight away.
+ */
 export function TabBar() {
-  const pathname = usePathname();
+  return (
+    <Suspense fallback={<TabBarView pathname={null} />}>
+      <TabBarHere />
+    </Suspense>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <Suspense fallback={<SidebarView pathname={null} />}>
+      <SidebarHere />
+    </Suspense>
+  );
+}
+
+function TabBarHere() {
+  return <TabBarView pathname={usePathname()} />;
+}
+
+function SidebarHere() {
+  return <SidebarView pathname={usePathname()} />;
+}
+
+/** Bottom tab bar on phones. */
+function TabBarView({ pathname }: { pathname: string | null }) {
   return (
     <nav className={styles.tabBar} aria-label="Main">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const active = isActive(pathname, href);
+        const active = pathname !== null && isActive(pathname, href);
         return (
           <Link
             key={href}
@@ -32,8 +60,7 @@ export function TabBar() {
 }
 
 /** Sidebar on iPad landscape and laptops. */
-export function Sidebar() {
-  const pathname = usePathname();
+function SidebarView({ pathname }: { pathname: string | null }) {
   const items = [...NAV_ITEMS, { href: "/settings", label: "Settings", icon: Settings }];
   return (
     <nav className={styles.sidebar} aria-label="Main">
@@ -43,7 +70,7 @@ export function Sidebar() {
       </Link>
       <ul>
         {items.map(({ href, label, icon: Icon }) => {
-          const active = isActive(pathname, href);
+          const active = pathname !== null && isActive(pathname, href);
           return (
             <li key={href}>
               <Link

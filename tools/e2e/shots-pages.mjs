@@ -24,6 +24,8 @@ for (const [name, path, before] of [
   ["timetable-week", "/timetable", async () => page.locator("[role=radio]:has-text('Week')").click()],
   ["assistant-settings", "/settings/assistant"],
   ["lists", "/lists"],
+  ["goals", "/tasks/goals"],
+  ...(process.env.GOAL ? [["goal", `/tasks/goals/${process.env.GOAL}`]] : []),
   ["listen", "/lists/listen"],
 ]) {
   try {

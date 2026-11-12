@@ -1,0 +1,156 @@
+/* A thin bar for how far along a goal or milestone is (done work, weighted by hours). */
+.bar {
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--fill-strong);
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--cat-study);
+}
+
+.big {
+  height: 6px;
+  border-radius: 3px;
+}
+
+.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.warn {
+  color: var(--cat-exam);
+}
+
+.muted {
+  color: var(--text-tertiary);
+}
+
+.review {
+  font: var(--text-callout);
+  white-space: pre-line;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lead {
+  font: var(--text-callout);
+}
+
+.meta {
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.danger {
+  color: var(--cat-exam);
+}
+
+/* Milestones as a timeline: a quiet rail with a dot per milestone. */
+.timeline {
+  list-style: none;
+}
+
+.milestone {
+  position: relative;
+  padding: 0 0 var(--space-6) var(--space-6);
+}
+
+.milestone::before {
+  position: absolute;
+  top: 8px;
+  bottom: -8px;
+  left: 5px;
+  width: 1.5px;
+  background: var(--separator);
+  content: "";
+}
+
+.milestone:last-child::before {
+  display: none;
+}
+
+.dot {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--text-tertiary);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.dot[data-state="done"] {
+  border-color: var(--cat-study);
+  background: var(--cat-study);
+}
+
+.dot[data-state="at_risk"],
+.dot[data-state="late"] {
+  border-color: var(--cat-exam);
+}
+
+.milestoneHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.milestoneTitle {
+  font: var(--text-headline);
+}
+
+.milestone[data-state="dropped"] .milestoneTitle {
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.state {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  font: var(--text-footnote);
+}
+
+.state[data-state="at_risk"],
+.state[data-state="late"] {
+  color: var(--cat-exam);
+}
+
+.confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+  font: var(--text-footnote);
+}
+
+.tasks {
+  margin-top: var(--space-2);
+}
+
+.question {
+  font: var(--text-body);
+}

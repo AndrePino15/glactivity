@@ -154,13 +154,13 @@ export type AgentNote = {
   body: string;
   status: "new" | "used" | null;
   /** "task": a task you described for the assistant to set up. */
-  topic?: "task" | null;
+  topic?: "task" | "goal" | null;
   source: "app" | "claude";
   created_at: string;
   updated_at: string;
 };
 
-export type AgentBrief = { id: string; day: string; slot: "morning" | "evening"; body: string; created_at: string };
+export type AgentBrief = { id: string; day: string; slot: "morning" | "evening" | "week"; body: string; created_at: string };
 
 /** What Accept will do (validated by the database when Claude proposes it). */
 export type AgentChange =
@@ -197,6 +197,8 @@ export type Task = {
   source: "app" | "claude";
   created_at: string;
   completed_at: string | null;
+  /** Set when the task is part of a goal. */
+  milestone_id?: string | null;
 };
 
 export type WorkBlock = {
@@ -207,4 +209,38 @@ export type WorkBlock = {
   status: "tentative" | "planned" | "skipped" | "withdrawn";
   source: "app" | "claude";
   note: string | null;
+};
+
+export type Goal = {
+  id: string;
+  title: string;
+  why: string | null;
+  target_date: string | null;
+  status: "draft" | "active" | "paused" | "done";
+  source: "app" | "claude";
+  created_at: string;
+  updated_at: string;
+};
+
+export type Milestone = {
+  id: string;
+  goal_id: string;
+  title: string;
+  target_date: string | null;
+  position: number;
+  status: "open" | "done" | "dropped";
+  date_source_url: string | null;
+  date_confirmed: boolean;
+  notes: string | null;
+};
+
+export type GoalNote = {
+  id: string;
+  goal_id: string;
+  kind: "question" | "answer" | "note" | "source";
+  body: string;
+  url: string | null;
+  resolved: boolean;
+  source: "app" | "claude";
+  created_at: string;
 };

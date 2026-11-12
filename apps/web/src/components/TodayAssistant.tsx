@@ -17,7 +17,7 @@ export function TodayAssistant({ today }: { today: ISODate }) {
   const briefs = useAgentBriefs(today);
   const suggestions = useAgentSuggestions(today);
   // The latest brief written today.
-  const brief = [...briefs.data].sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
+  const brief = briefs.data.filter((b) => b.slot !== "week").sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
   const run = useRunCheck();
 
   return (
