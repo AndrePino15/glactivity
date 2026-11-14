@@ -76,3 +76,4 @@ Big features are developed on a branch and merged to `main` at each milestone.
     - [x] (e) Scheduled check every morning and evening (about 06:45 and 17:45) on the owner's Claude plan, and "Run now" on Today
 - [ ] **Phase 4 – SwiftUI app** for iPhone/iPad, plus Apple Health auto-logging of workouts.
 - [ ] **Phase 5 – ESP32 alarm** so the phone can stay out of the bedroom.
+- [ ] **Voice (on hold)**: talk to Glactivity through an Alexa+ add-on once Amazon opens access (request filed). Research and options: [`docs/voice-assistant.md`](voice-assistant.md).
