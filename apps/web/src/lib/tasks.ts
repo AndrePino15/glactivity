@@ -16,7 +16,7 @@ export function taskProgress(task: Task, blocks: WorkBlock[], now: Date) {
   let planned = 0;
   for (const b of blocks) {
     if (b.task_id !== task.id) continue;
-    if (b.status === "planned" && new Date(b.ends_at) <= now) spent += blockMinutes(b);
+    if (b.status === "planned" && b.outcome !== "missed" && new Date(b.ends_at) <= now) spent += blockMinutes(b);
     else if ((b.status === "planned" || b.status === "tentative") && new Date(b.ends_at) > now) planned += blockMinutes(b);
   }
   const estimate = task.estimate_minutes ?? 0;

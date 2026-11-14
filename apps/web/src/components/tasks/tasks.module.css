@@ -133,3 +133,36 @@
   color: var(--cat-exam);
 }
 
+
+/* "How did it go?" after a study block. */
+.answers {
+  list-style: none;
+}
+
+.answerRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 0;
+  border-bottom: 0.5px solid var(--separator);
+}
+
+.answerRow:first-child {
+  border-top: 0.5px solid var(--separator);
+}
+
+.answerTitle {
+  font: var(--text-body);
+}
+
+.answerWhen {
+  color: var(--text-secondary);
+  font: var(--text-subhead);
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button, Label, List, Note, Row, Section, Segmented, Sheet, TextButton, TextField } from "@/components/ui";
 import { refresh, write } from "@/lib/db/client";
-import { useAgentActivity, useAgentNotes, useProfile, useRunNow, useToday } from "@/lib/db/hooks";
+import { useAgentActivity, useAgentNotes, useProfile, useRunNow, useTasks, useToday, useWorkBlocks } from "@/lib/db/hooks";
+import { learningFrom } from "@/lib/durations";
+import { useNow } from "@/lib/use-now";
+import { addDays } from "@/lib/dates";
 import { formatShortDay, formatTime, relativeDay, toISODate } from "@/lib/dates";
 import type { AgentNote, Autonomy } from "@/lib/db/types";
 import styles from "../settings.module.css";
@@ -34,6 +37,10 @@ export function AssistantSettings() {
 
       <Section title="How much it does">
         <AutonomyPicker />
+      </Section>
+
+      <Section title="How long things take">
+        <HowLong />
       </Section>
 
       <Section title="What it knows about you">
@@ -69,6 +76,49 @@ export function AssistantSettings() {
 
       <Activity />
     </>
+  );
+}
+
+/** What your answers after study blocks show, the same summary the assistant plans with. */
+function HowLong() {
+  const today = useToday();
+  const tasks = useTasks();
+  const blocks = useWorkBlocks(today ? addDays(today, -56) : null, today);
+  const clock = useNow();
+  if (!today || !clock) return null;
+  const now = clock.getTime();
+  const ended = blocks.data.filter((b) => new Date(b.ends_at).getTime() <= now);
+  const learning = learningFrom(
+    ended.map((b) => ({
+      outcome: b.outcome ?? null,
+      minutes: Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000),
+      localHour: new Date(b.starts_at).getHours(),
+      status: b.status,
+    })),
+    tasks.data
+      .filter((t) => t.status === "done")
+      .map((t) => ({
+        subject: t.subject,
+        first_estimate_minutes: t.first_estimate_minutes ?? t.estimate_minutes,
+        actual_minutes: ended
+          .filter((b) => b.task_id === t.id && b.status === "planned" && b.outcome !== "missed")
+          .reduce((sum, b) => sum + Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000), 0),
+      })),
+  );
+  if (learning.sentences.length === 0) {
+    return (
+      <Note>
+        After a study block, tap Done, Needed more or Didn’t do it on Today. Once a few tasks are finished, this shows how long things
+        really take you, and your assistant plans with it.
+      </Note>
+    );
+  }
+  return (
+    <List>
+      {learning.sentences.map((line) => (
+        <Row key={line} title={<span className={own.wrap}>{line}</span>} />
+      ))}
+    </List>
   );
 }
 

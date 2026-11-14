@@ -5,6 +5,7 @@ import { DailyGames } from "@/components/fun/DailyGames";
 import { TodayMeals } from "@/components/lifestyle/TodayMeals";
 import { TodayAssistant } from "@/components/TodayAssistant";
 import { BlockSheet } from "@/components/tasks/BlockSheet";
+import { HowDidItGo } from "@/components/tasks/HowDidItGo";
 import { TodaySuggestions } from "@/components/TodaySuggestions";
 import { TodayWorkout } from "@/components/lifestyle/TodayWorkout";
 import { useState } from "react";
@@ -132,6 +133,8 @@ export function TodayContent() {
           empty={sourcesLoaded && sources.length === 0 ? "Add your timetable link in Settings to see lectures here." : "Nothing scheduled today."}
         />
       </Section>
+
+      <HowDidItGo today={today} />
 
       {due.length > 0 && (
         <Section title="Due soon">

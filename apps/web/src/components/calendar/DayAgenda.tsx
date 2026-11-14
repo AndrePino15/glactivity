@@ -40,7 +40,17 @@ export function DayAgenda({
           }
           title={e.title}
           detail={[
-            e.block?.status === "tentative" ? "Pencilled in" : e.block ? "Study" : null,
+            e.block?.outcome === "missed"
+              ? "Didn’t do it"
+              : e.block?.outcome === "more"
+                ? "Needed more"
+                : e.block?.outcome === "done"
+                  ? "Done"
+                  : e.block?.status === "tentative"
+                    ? "Pencilled in"
+                    : e.block
+                      ? "Study"
+                      : null,
             e.all_day ? null : `until ${formatTime(e.ends_at)}`,
             e.location,
           ]

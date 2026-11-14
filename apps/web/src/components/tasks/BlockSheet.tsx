@@ -5,9 +5,12 @@ import { Button, Label, Note, Sheet, TextButton, TextField } from "@/components/
 import { formatShortDay, formatTime, toISODate, toTimestamp } from "@/lib/dates";
 import { refresh, write } from "@/lib/db/client";
 import type { CalendarEvent } from "@/lib/db/types";
+import { BlockAnswer } from "./BlockAnswer";
 import styles from "./tasks.module.css";
 
 type Block = NonNullable<CalendarEvent["block"]>;
+
+const OUTCOME = { done: "done", more: "needed more", missed: "didn’t do it" } as const;
 
 /** A study block: keep, move or skip it (tentative ones were pencilled in by the assistant). */
 export function BlockSheet({ block, onClose }: { block: Block | null; onClose: () => void }) {
@@ -25,6 +28,7 @@ function BlockBody({ block, onDone }: { block: Block; onDone: () => void }) {
   const [end, setEnd] = useState(formatTime(block.ends_at));
   const [error, setError] = useState<string | null>(null);
   const tentative = block.status === "tentative";
+  const ended = new Date(block.ends_at) <= new Date();
 
   async function update(row: Record<string, unknown>) {
     try {
@@ -50,9 +54,24 @@ function BlockBody({ block, onDone }: { block: Block; onDone: () => void }) {
   return (
     <div className={styles.form}>
       <p className={styles.when}>{when}</p>
-      {tentative && <Note>Pencilled in by your assistant. Keep it, move it, or skip it and it’ll plan around that.</Note>}
+      {!ended && tentative && <Note>Pencilled in by your assistant. Keep it, move it, or skip it and it’ll plan around that.</Note>}
       {block.note && <Note>{block.note}</Note>}
-      {moving ? (
+      {ended ? (
+        <>
+          <Note>
+            {block.outcome
+              ? `You said: ${OUTCOME[block.outcome]}. Change it if that’s not right.`
+              : "How did it go? Your assistant learns how long things really take you from this."}
+          </Note>
+          <BlockAnswer
+            blockId={block.id}
+            onAnswered={() => {
+              void refresh("work-blocks", "tasks");
+              onDone();
+            }}
+          />
+        </>
+      ) : moving ? (
         <form className={styles.form} onSubmit={move}>
           <Label text="Date">
             <TextField type="date" value={date} onChange={(e) => setDate(e.target.value)} required />

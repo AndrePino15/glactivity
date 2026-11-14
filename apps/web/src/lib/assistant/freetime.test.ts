@@ -135,3 +135,38 @@ describe("goal planning", () => {
     expect(await steps("morning")).not.toContain("Sundays only");
   });
 });
+
+describe("learning in the connector", () => {
+  it("adds what the block answers teach to get_context", async () => {
+    const blocks = [9, 10, 11, 8, 20, 21, 19].map((h, i) => ({ outcome: i < 4 || i === 6 ? "done" : "missed", minutes: 60, local_hour: h, status: "planned" }));
+    const rpc = vi.fn(async (fn: string) =>
+      fn === "agent_duration_stats"
+        ? {
+            blocks,
+            finished_tasks: [
+              { subject: "HIST", first_estimate_minutes: 60, actual_minutes: 90 },
+              { subject: "HIST", first_estimate_minutes: 60, actual_minutes: 96 },
+              { subject: null, first_estimate_minutes: 60, actual_minutes: 84 },
+            ],
+          }
+        : fn === "agent_plan_context"
+          ? { blocks: [] }
+          : fn === "agent_goal_context"
+            ? { goals: [], this_week_for_goals: null }
+            : { today: "2026-11-17", now: "2026-11-17T08:00:00Z", timezone: TZ, profile: null, events: [], periods: [], training_plan: [], training_log: [], meal_plan: [], media: [], rule_suggestion_feedback: [] },
+    );
+    const reply = await handleMessage({ jsonrpc: "2.0", id: 10, method: "tools/call", params: { name: "get_context", arguments: {} } }, rpc);
+    const learning = (reply?.result as { structuredContent: { learning: Record<string, unknown> } }).structuredContent.learning;
+    expect(learning).toMatchObject({ estimate_ratio: 1.5, best_time_of_day: "morning", blocks_answered: 7 });
+    expect(learning.in_words).toContain("Things take about 1.5× the first estimate (from 3 finished tasks).");
+  });
+
+  it("records how a block went from a chat", async () => {
+    const rpc = vi.fn(async () => ({ outcome: "more" }));
+    await handleMessage(
+      { jsonrpc: "2.0", id: 11, method: "tools/call", params: { name: "record_block_outcome", arguments: { block_id: "b", outcome: "more", extra_minutes: 60 } } },
+      rpc,
+    );
+    expect(rpc).toHaveBeenCalledWith("agent_record_outcome", { block_id: "b", outcome: "more", extra_minutes: 60 });
+  });
+});

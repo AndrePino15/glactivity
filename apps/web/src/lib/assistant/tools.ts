@@ -1,5 +1,6 @@
 import { addDays } from "../dates";
 import { freeTime } from "./freetime";
+import { learningFrom } from "../durations";
 import { milestoneState, progressFromTotals } from "../goals";
 import { checkSteps, goalPlanningSteps } from "./instructions";
 import { ruleSuggestions, type AgentContext } from "./rules";
@@ -81,6 +82,34 @@ function withProgress(ctx: GoalContext, today: string) {
   };
 }
 
+type DurationStats = {
+  blocks: { outcome: "done" | "more" | "missed" | null; minutes: number; local_hour: number; status: string }[];
+  finished_tasks: { subject: string | null; first_estimate_minutes: number | null; actual_minutes: number }[];
+};
+
+/** What his answers after study blocks say, worked out the same way the app shows it. */
+function learningSummary(stats: DurationStats) {
+  try {
+    const l = learningFrom(
+      stats.blocks.map((b) => ({ outcome: b.outcome, minutes: b.minutes, localHour: b.local_hour, status: b.status })),
+      stats.finished_tasks,
+    );
+    return {
+      estimate_ratio: l.estimateRatio,
+      ratio_by_subject: l.ratioBySubject,
+      tasks_compared: l.tasksCompared,
+      follow_through_by_time_of_day: l.followThrough,
+      best_time_of_day: l.bestTime,
+      blocks_answered: l.answered,
+      blocks_unanswered: l.unanswered,
+      in_words: l.sentences,
+      recent_blocks: stats.blocks.slice(-30),
+    };
+  } catch {
+    return null;
+  }
+}
+
 const GOAL_TASK = object(
   {
     id: { type: "string", format: "uuid", description: "Only to change an existing task" },
@@ -145,17 +174,19 @@ export const TOOLS: Tool[] = [
       "training plan and log, meal plan and saved meals, reminders, shopping list, what he's reading/watching/listening to, " +
       "games played, feedback on suggestions, the free rules-based suggestions already on Today, and your memory " +
       "(profile, his new notes, what you've learned), and his goals with milestones, progress (weighted by hours), open questions " +
-      "and his answers. Call this first.",
+      "and his answers, and learning: how long things really take him against his first estimates, and when study blocks actually " +
+      "get done (from his one-tap answers after each block). Call this first.",
     inputSchema: object({
       days_back: { type: "integer", minimum: 0, maximum: 31, default: 7 },
       days_ahead: { type: "integer", minimum: 0, maximum: 62, default: 7 },
     }),
     annotations: read,
     run: async (args, rpc) => {
-      const [ctx, plans, goals] = await Promise.all([
+      const [ctx, plans, goals, durations] = await Promise.all([
         rpc("agent_context", { days_back: args.days_back ?? 7, days_ahead: args.days_ahead ?? 7 }) as Promise<AgentContext>,
         rpc("agent_plan_context", { days_ahead: Math.max(14, Number(args.days_ahead ?? 7)) }) as Promise<Record<string, unknown>>,
         rpc("agent_goal_context", {}) as Promise<GoalContext>,
+        rpc("agent_duration_stats", { days: 56 }) as Promise<DurationStats>,
       ]);
       let rules: { title: string; detail: string }[] = [];
       try {
@@ -163,7 +194,7 @@ export const TOOLS: Tool[] = [
       } catch {
         // The rules are a nice-to-have here; the context still stands.
       }
-      return { ...ctx, ...plans, ...withProgress(goals, ctx.today), free_suggestions_on_today: rules };
+      return { ...ctx, ...plans, ...withProgress(goals, ctx.today), learning: learningSummary(durations), free_suggestions_on_today: rules };
     },
   },
   {
@@ -617,6 +648,24 @@ export const TOOLS: Tool[] = [
     ),
     annotations: write,
     run: (args, rpc) => rpc("agent_log_progress", { task_id: args.task_id, minutes: args.minutes ?? null, done: args.done ?? false }),
+  },
+  {
+    name: "record_block_outcome",
+    title: "Record how a block went",
+    description:
+      "When the owner tells you how a study block went (\"I didn't do my essay block this morning\", \"the lab report needed another hour\"): " +
+      "done, more (needed more: extra_minutes is added to the task's estimate) or missed (the planner finds new time). Only blocks that have ended.",
+    inputSchema: object(
+      {
+        block_id: { type: "string", format: "uuid" },
+        outcome: { type: "string", enum: ["done", "more", "missed"] },
+        extra_minutes: { type: "integer", minimum: 0, maximum: 600 },
+      },
+      ["block_id", "outcome"],
+    ),
+    annotations: overwrite,
+    run: (args, rpc) =>
+      rpc("agent_record_outcome", { block_id: args.block_id, outcome: args.outcome, extra_minutes: args.extra_minutes ?? null }),
   },
   {
     name: "get_run_steps",
