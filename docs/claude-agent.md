@@ -107,6 +107,12 @@ Build this in stages, each verified and shipped before the next: (a) connector +
 - Progress logic: `apps/web/src/lib/goals.ts` (tasks without an estimate count as an hour; a milestone is at risk when it needs more than 1½ hours a day, or is nearly due and not nearly done). Browser check: `tools/e2e/walk-goals.mjs`.
 - The owner switched the scheduled task's model to Opus in the task editor (11 Nov); the model is whatever is set there.
 
+**Stage (d): done.** All five stages are now built.
+- After a study block ends, one tap on Today ("How did it go?") or in the block's sheet: Done, Needed more (+30 min, +1 h, +2 h or not sure, added to the task's estimate) or Didn't do it (not counted as time spent, so the planner finds new time). A pencilled-in block you did anyway becomes kept. The schedule shows the answer.
+- Database: `backend/supabase/migrations/20261117000000_durations.sql` (`work_blocks.outcome`, `extra_minutes`, `answered_at`; `tasks.first_estimate_minutes` kept by a trigger so top-ups don't hide how far off the first guess was; `answer_block` runs as the owner; time spent leaves out missed blocks; `agent_duration_stats` and `agent_record_outcome` for the connector). Tests: `backend/tests/durations.test.ts`.
+- Learning: `apps/web/src/lib/durations.ts` works out how long things take against the first estimate (median, overall and per subject, from at least 3 finished tasks) and follow-through by time of day (from at least 5 answered blocks). `get_context` includes it as `learning`; the check keeps the profile's "how long things take" line current, plans with the ratio and the best time of day, and estimates new tasks with it. Settings → Assistant shows the same sentences under "How long things take". A chat can record a block with `record_block_outcome`.
+- Browser check: `tools/e2e/walk-durations.mjs`.
+
 **Adding the connector:** Settings → Assistant → Copy link, then at claude.ai/customize/connectors → Add custom connector, name "Glactivity", paste the link, no sign-in. Try it in a chat: "What's my week like?" or "Do my Glactivity morning check".
 
 ## Constraints

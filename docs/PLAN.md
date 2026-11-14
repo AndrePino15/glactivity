@@ -66,13 +66,13 @@ Big features are developed on a branch and merged to `main` at each milestone.
   - Meals: lunch and dinner for each day, saved meals with ingredients; planning one adds its missing ingredients to the shopping list
   - Modes: exams in the next week go to the top of Today and lighten workouts; in Portugal the gym becomes home or a run, and shopping-day nudges pause
   - Reminder notifications to your phone each morning (see `docs/notifications.md`)
-- [ ] **Phase 3 – Smarter**
+- [x] **Phase 3 – Smarter**
   - [x] Rules-based suggestions on Today ("For today"): revision time before exams, plan meals before shopping, free evenings, long gaps between lectures, a nudge after quiet days, empty weekends. Each can be acted on or dismissed for the day. Free, no AI.
-  - [ ] Claude assistant on the owner's subscription (no API credit). Agreed design and progress: [`docs/claude-agent.md`](claude-agent.md).
+  - [x] Claude assistant on the owner's subscription (no API credit). Agreed design and progress: [`docs/claude-agent.md`](claude-agent.md).
     - [x] (a) Glactivity connector for Claude (secret link from Settings → Assistant), memory (your notes, what it learned, a short profile), a brief and accept/dismiss ideas on Today, "Tell your assistant", and an activity log
     - [x] (b) Tasks tab (in place of Fun): describe a task in your own words and the assistant sets it up, with deadlines, estimates and progress; the planner pencils study blocks into free time (keep, move or skip them on Today and in the Timetable); Suggest / Plan / Autopilot setting
     - [x] (c) Goals in the Tasks tab: describe a goal and the assistant drafts milestones and tasks with questions for you; progress weighted by hours, dates to confirm with their sources, next goal step on Today, a "Plan a goal" prompt for Claude chats, and a Sunday weekly review
-    - [ ] (d) Learning how long things take
+    - [x] (d) One tap after each study block (Done, Needed more, Didn't do it); the assistant learns how long things really take and when study gets done, and plans with it
     - [x] (e) Scheduled check every morning and evening (about 06:45 and 17:45) on the owner's Claude plan, and "Run now" on Today
 - [ ] **Phase 4 – SwiftUI app** for iPhone/iPad, plus Apple Health auto-logging of workouts.
 - [ ] **Phase 5 – ESP32 alarm** so the phone can stay out of the bedroom.

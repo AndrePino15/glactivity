@@ -51,6 +51,12 @@ export async function answerGoal(goalId: string, body: string) {
   await refresh("goal-notes");
 }
 
+/** Your one-tap answer once a study block has ended. "more" adds extraMinutes to the task's estimate. */
+export async function answerBlock(blockId: string, outcome: "done" | "more" | "missed", extraMinutes?: number) {
+  await write((db) => db.rpc("answer_block", { block_id: blockId, outcome, extra_minutes: extraMinutes ?? null }));
+  await refresh("work-blocks", "tasks", "agent-activity");
+}
+
 /** Applies the suggestion's change as you (row level security applies) and marks it accepted. */
 export async function acceptSuggestion(id: string) {
   await write((db) => db.rpc("accept_agent_suggestion", { suggestion_id: id }));

@@ -16,7 +16,7 @@ function timeOn(taskId: string, blocks: WorkBlock[], now: Date) {
   let planned = 0;
   for (const b of blocks) {
     if (b.task_id !== taskId) continue;
-    if (b.status === "planned" && new Date(b.ends_at) <= now) spent += blockMinutes(b);
+    if (b.status === "planned" && b.outcome !== "missed" && new Date(b.ends_at) <= now) spent += blockMinutes(b);
     else if ((b.status === "planned" || b.status === "tentative") && new Date(b.ends_at) > now) planned += blockMinutes(b);
   }
   return { spent, planned };

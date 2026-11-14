@@ -199,6 +199,8 @@ export type Task = {
   completed_at: string | null;
   /** Set when the task is part of a goal. */
   milestone_id?: string | null;
+  /** The estimate as first given, before any "needed more". */
+  first_estimate_minutes?: number | null;
 };
 
 export type WorkBlock = {
@@ -209,7 +211,12 @@ export type WorkBlock = {
   status: "tentative" | "planned" | "skipped" | "withdrawn";
   source: "app" | "claude";
   note: string | null;
+  /** How it went, answered once it has ended. */
+  outcome?: BlockOutcome | null;
+  extra_minutes?: number | null;
 };
+
+export type BlockOutcome = "done" | "more" | "missed";
 
 export type Goal = {
   id: string;
